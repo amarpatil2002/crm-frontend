@@ -1,0 +1,28 @@
+import { Navigate, Route, Routes } from "react-router-dom";
+
+import RegisterPage from "../features/auth/pages/RegisterPage";
+import VerifyEmailPage from "../features/auth/pages/VerifyEmailPage";
+import LoginPage from "../features/auth/pages/LoginPage";
+import DashboardPage from "../pages/DashboardPage";
+
+import ProtectedRoute from "../routes/ProtectedRotes";
+import GuestRoute from "../routes/GuestRoutes";
+
+export default function AppRoutes() {
+  return (
+    <Routes>
+      <Route element={<GuestRoute />}>
+        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/verify-email" element={<VerifyEmailPage />} />
+        <Route path="/login" element={<LoginPage />} />
+      </Route>
+
+      <Route element={<ProtectedRoute />}>
+        <Route path="/dashboard" element={<DashboardPage />} />
+      </Route>
+
+      <Route path="/" element={<Navigate to="/login" replace />} />
+      <Route path="*" element={<Navigate to="/login" replace />} />
+    </Routes>
+  );
+}
