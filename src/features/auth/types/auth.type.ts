@@ -43,7 +43,7 @@ export interface RegisterResponseData {
 
 export interface LoginResponseData {
   user: User;
-  accessToken: Tokens;
+  accessToken: string;
 }
 
 export interface ApiResponse<T> {
@@ -55,7 +55,6 @@ export interface ApiResponse<T> {
 export interface AuthState {
   user: User | null;
   accessToken: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
   isBootstrapped: boolean;
 }

@@ -10,7 +10,6 @@ interface SetCredentialsPayload {
 const initialState: AuthState = {
   user: storage.getUser(),
   accessToken: storage.getAccessToken(),
-  refreshToken: storage.getRefreshToken(),
   isAuthenticated: Boolean(storage.getAccessToken() && storage.getUser()),
   isBootstrapped: true,
 };
