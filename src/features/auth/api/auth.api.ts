@@ -29,8 +29,5 @@ export async function loginApi(payload: LoginPayload) {
     "/public/auth/login",
     payload,
   );
-
-  console.log(response);
-
   return response.data;
 }

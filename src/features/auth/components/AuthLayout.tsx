@@ -205,7 +205,8 @@ function VerifyIllustration() {
           <div className="absolute inset-0 overflow-hidden rounded-[28px]">
             <div className="absolute left-0 top-0 h-1/2 w-full bg-[#ece9ff]" />
             <div className="absolute bottom-0 left-0 h-1/2 w-full bg-[#d9d3ff]" />
-            <div className="absolute left-0 top-0 h-full w-full">
+
+            <div className="absolute inset-0">
               <div className="absolute left-0 top-0 h-0 w-0 border-l-[150px] border-r-[150px] border-t-[110px] border-l-transparent border-r-transparent border-t-[#d7d1ff]" />
               <div className="absolute bottom-0 left-0 h-0 w-0 border-b-[110px] border-l-[150px] border-r-[150px] border-l-transparent border-r-transparent border-b-[#c8c0ff]" />
             </div>
