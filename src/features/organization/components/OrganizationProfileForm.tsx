@@ -8,13 +8,11 @@ import ErrorText from "../../../components/ui/ErrorText";
 import Button from "../../../components/ui/Button";
 import TextArea from "../../../components/ui/TextArea";
 
-import {
-  organizationProfileSchema,
-  type OrganizationProfileFormValues,
-} from "../schema/organization.schema";
+import { organizationProfileSchema } from "../schema/organization.schema";
 import type {
   Organization,
   UpdateOrganizationPayload,
+  OrganizationProfileFormValues,
 } from "../types/organization.type";
 import { updateMyOrganizationApi } from "../api/organization.api";
 

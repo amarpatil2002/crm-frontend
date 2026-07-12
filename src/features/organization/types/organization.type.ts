@@ -1,4 +1,5 @@
 export type OrganizationStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
+
 export type SubscriptionPlan = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
 
 export interface OrganizationAddress {
@@ -25,31 +26,37 @@ export interface OrganizationSubscription {
 
 export interface OrganizationOwner {
   _id: string;
-  firstName?: string;
-  lastName?: string;
-  email?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
 }
 
 export interface Organization {
   _id: string;
   name: string;
   slug: string;
-  logo: string;
+
+  logo: string | null;
+
   website: string | null;
   email: string;
   phone: string | null;
   industry: string | null;
   description: string | null;
+
   address: OrganizationAddress;
   settings: OrganizationSettings;
+
   subscription: OrganizationSubscription;
+
   owner: OrganizationOwner | null;
+
   status: OrganizationStatus;
-  isDeleted: boolean;
-  deletedAt: string | null;
+
+  isPremium: boolean;
+
   createdAt: string;
   updatedAt: string;
-  isPremium?: boolean;
 }
 
 export interface GetOrganizationResponse {
@@ -60,18 +67,47 @@ export interface GetOrganizationResponse {
 
 export interface UpdateOrganizationPayload {
   name: string;
+
   website: string | null;
+
   email: string;
+
   phone: string | null;
+
   industry: string | null;
+
   description: string | null;
+
+  address: OrganizationAddress;
+
+  settings: OrganizationSettings;
+}
+
+/*
+ * React Hook Form values
+ * Keep everything as string because inputs always return strings.
+ */
+export interface OrganizationProfileFormValues {
+  name: string;
+
+  website: string;
+
+  email: string;
+
+  phone: string;
+
+  industry: string;
+
+  description: string;
+
   address: {
-    street: string | null;
-    city: string | null;
-    state: string | null;
-    country: string | null;
-    zipCode: string | null;
+    street: string;
+    city: string;
+    state: string;
+    country: string;
+    zipCode: string;
   };
+
   settings: {
     timezone: string;
     language: string;
