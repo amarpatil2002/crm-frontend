@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -28,29 +28,28 @@ export default function OrganizationProfileForm({
   const [apiError, setApiError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  const defaultValues = useMemo<OrganizationProfileFormValues>(
-    () => ({
-      name: organization.name || "",
-      website: organization.website ?? "",
-      email: organization.email || "",
-      phone: organization.phone ?? "",
-      industry: organization.industry ?? "",
-      description: organization.description ?? "",
-      address: {
-        street: organization.address?.street ?? "",
-        city: organization.address?.city ?? "",
-        state: organization.address?.state ?? "",
-        country: organization.address?.country ?? "",
-        zipCode: organization.address?.zipCode ?? "",
-      },
-      settings: {
-        timezone: organization.settings?.timezone || "UTC",
-        language: organization.settings?.language || "en",
-        currency: organization.settings?.currency || "USD",
-      },
-    }),
-    [organization],
-  );
+  const defaultValues: OrganizationProfileFormValues = {
+    name: organization.name ?? "",
+    website: organization.website ?? "",
+    email: organization.email ?? "",
+    phone: organization.phone ?? "",
+    industry: organization.industry ?? "",
+    description: organization.description ?? "",
+
+    address: {
+      street: organization.address?.street ?? "",
+      city: organization.address?.city ?? "",
+      state: organization.address?.state ?? "",
+      country: organization.address?.country ?? "",
+      zipCode: organization.address?.zipCode ?? "",
+    },
+
+    settings: {
+      timezone: organization.settings?.timezone ?? "Asia/Kolkata",
+      language: organization.settings?.language ?? "en",
+      currency: organization.settings?.currency ?? "INR",
+    },
+  };
 
   const {
     register,

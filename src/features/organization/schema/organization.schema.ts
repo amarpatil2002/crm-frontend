@@ -1,54 +1,31 @@
 import * as yup from "yup";
+import type { OrganizationProfileFormValues } from "../types/organization.type";
 
-export const organizationProfileSchema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required("Organization name is required")
-    .min(2, "Organization name must be at least 2 characters")
-    .max(100, "Organization name must be at most 100 characters"),
+export const organizationProfileSchema: yup.ObjectSchema<OrganizationProfileFormValues> =
+  yup.object({
+    name: yup.string().required(),
 
-  website: yup
-    .string()
-    .trim()
-    .test(
-      "website",
-      "Enter a valid website",
-      (value) => !value || /^https?:\/\/.+/i.test(value),
-    ),
+    website: yup.string().default(""),
 
-  email: yup
-    .string()
-    .trim()
-    .required("Business email is required")
-    .email("Enter a valid email address"),
+    email: yup.string().email().required(),
 
-  phone: yup.string().trim(),
+    phone: yup.string().default(""),
 
-  industry: yup.string().trim(),
+    industry: yup.string().default(""),
 
-  description: yup
-    .string()
-    .trim()
-    .max(500, "Description cannot exceed 500 characters"),
+    description: yup.string().default(""),
 
-  address: yup.object({
-    street: yup.string(),
+    address: yup.object({
+      street: yup.string().default(""),
+      city: yup.string().default(""),
+      state: yup.string().default(""),
+      country: yup.string().default(""),
+      zipCode: yup.string().default(""),
+    }),
 
-    city: yup.string(),
-
-    state: yup.string(),
-
-    country: yup.string(),
-
-    zipCode: yup.string(),
-  }),
-
-  settings: yup.object({
-    timezone: yup.string().required("Timezone is required"),
-
-    language: yup.string().required("Language is required"),
-
-    currency: yup.string().required("Currency is required"),
-  }),
-});
+    settings: yup.object({
+      timezone: yup.string().required(),
+      language: yup.string().required(),
+      currency: yup.string().required(),
+    }),
+  });
