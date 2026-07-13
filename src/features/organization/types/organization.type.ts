@@ -1,6 +1,23 @@
+/* -------------------------------------------------------------------------- */
+/*                               Organization Status                          */
+/* -------------------------------------------------------------------------- */
+
 export type OrganizationStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
-export type SubscriptionPlan = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
+/* -------------------------------------------------------------------------- */
+/*                              Subscription Plan                             */
+/* -------------------------------------------------------------------------- */
+
+export type SubscriptionPlan =
+  | "FREE"
+  | "STARTER"
+  | "PRO"
+  | "BUSINESS"
+  | "ENTERPRISE";
+
+/* -------------------------------------------------------------------------- */
+/*                                   Address                                  */
+/* -------------------------------------------------------------------------- */
 
 export interface OrganizationAddress {
   street: string | null;
@@ -10,60 +27,91 @@ export interface OrganizationAddress {
   zipCode: string | null;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                  Settings                                  */
+/* -------------------------------------------------------------------------- */
+
 export interface OrganizationSettings {
   timezone: string;
   language: string;
   currency: string;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                Subscription                                */
+/* -------------------------------------------------------------------------- */
+
 export interface OrganizationSubscription {
   plan: SubscriptionPlan;
+
   startsAt: string;
+
   expiresAt: string | null;
+
   maxUsers: number;
+
   maxStorage: number;
 }
 
+/* -------------------------------------------------------------------------- */
+/*                                   Owner                                    */
+/* -------------------------------------------------------------------------- */
+
 export interface OrganizationOwner {
   _id: string;
-  firstName: string;
-  lastName: string;
-  email: string;
+
+  firstName?: string;
+
+  lastName?: string;
+
+  email?: string;
 }
+
+/* -------------------------------------------------------------------------- */
+/*                               Organization                                 */
+/* -------------------------------------------------------------------------- */
 
 export interface Organization {
   _id: string;
+
   name: string;
+
   slug: string;
 
-  logo: string | null;
+  logo: string;
 
   website: string | null;
+
   email: string;
+
   phone: string | null;
+
   industry: string | null;
+
   description: string | null;
 
   address: OrganizationAddress;
+
   settings: OrganizationSettings;
 
   subscription: OrganizationSubscription;
 
-  owner: OrganizationOwner | null;
+  owner: OrganizationOwner;
 
   status: OrganizationStatus;
 
-  isPremium: boolean;
+  isDeleted: boolean;
+
+  deletedAt: string | null;
 
   createdAt: string;
+
   updatedAt: string;
 }
 
-export interface GetOrganizationResponse {
-  success: boolean;
-  message: string;
-  data: Organization;
-}
+/* -------------------------------------------------------------------------- */
+/*                           Update Organization DTO                          */
+/* -------------------------------------------------------------------------- */
 
 export interface UpdateOrganizationPayload {
   name: string;
@@ -83,10 +131,30 @@ export interface UpdateOrganizationPayload {
   settings: OrganizationSettings;
 }
 
-/*
- * React Hook Form values
- * Keep everything as string because inputs always return strings.
- */
+/* -------------------------------------------------------------------------- */
+/*                            Logo Upload Response                            */
+/* -------------------------------------------------------------------------- */
+
+export interface LogoUploadResponse {
+  logo: string;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                          Organization API Response                         */
+/* -------------------------------------------------------------------------- */
+
+export interface OrganizationResponse {
+  success: boolean;
+
+  message: string;
+
+  data: Organization;
+}
+
+/* -------------------------------------------------------------------------- */
+/*                         Organization Form Values                           */
+/* -------------------------------------------------------------------------- */
+
 export interface OrganizationProfileFormValues {
   name: string;
 
@@ -102,15 +170,65 @@ export interface OrganizationProfileFormValues {
 
   address: {
     street: string;
+
     city: string;
+
     state: string;
+
     country: string;
+
     zipCode: string;
   };
 
   settings: {
     timezone: string;
+
     language: string;
+
+    currency: string;
+  };
+}
+
+/* -------------------------------------------------------------------------- */
+/*                    Organization Profile Form Values                        */
+/* -------------------------------------------------------------------------- */
+
+export interface OrganizationProfileFormValues {
+  /* General Information */
+
+  name: string;
+
+  website: string;
+
+  email: string;
+
+  phone: string;
+
+  industry: string;
+
+  description: string;
+
+  /* Address */
+
+  address: {
+    street: string;
+
+    city: string;
+
+    state: string;
+
+    country: string;
+
+    zipCode: string;
+  };
+
+  /* Workspace Settings */
+
+  settings: {
+    timezone: string;
+
+    language: string;
+
     currency: string;
   };
 }

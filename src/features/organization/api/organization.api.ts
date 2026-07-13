@@ -1,34 +1,57 @@
 import api from "../../../api/axios";
 
 import type {
-  GetOrganizationResponse,
+  Organization,
+  OrganizationResponse,
   UpdateOrganizationPayload,
 } from "../types/organization.type";
 
-export async function getMyOrganizationApi() {
-  const response = await api.get<GetOrganizationResponse>("/organizations/me");
+/* -------------------------------------------------------------------------- */
+/*                                  Endpoints                                 */
+/* -------------------------------------------------------------------------- */
 
-  return response.data;
-}
+const ORGANIZATION_ENDPOINT = "/crm/organization";
 
-export async function updateMyOrganizationApi(
+/* -------------------------------------------------------------------------- */
+/*                              Get Organization                              */
+/* -------------------------------------------------------------------------- */
+
+export const getMyOrganizationApi = async (): Promise<OrganizationResponse> => {
+  const { data } = await api.get<OrganizationResponse>(
+    `${ORGANIZATION_ENDPOINT}/me`,
+  );
+
+  return data;
+};
+
+/* -------------------------------------------------------------------------- */
+/*                            Update Organization                             */
+/* -------------------------------------------------------------------------- */
+
+export const updateOrganizationApi = async (
   payload: UpdateOrganizationPayload,
-) {
-  const response = await api.put<GetOrganizationResponse>(
-    "/organizations/me",
+): Promise<OrganizationResponse> => {
+  const { data } = await api.patch<OrganizationResponse>(
+    `${ORGANIZATION_ENDPOINT}/me`,
     payload,
   );
 
-  return response.data;
-}
+  return data;
+};
 
-export async function uploadOrganizationLogoApi(file: File) {
+/* -------------------------------------------------------------------------- */
+/*                               Upload Logo                                  */
+/* -------------------------------------------------------------------------- */
+
+export const uploadOrganizationLogoApi = async (
+  file: File,
+): Promise<OrganizationResponse> => {
   const formData = new FormData();
 
   formData.append("logo", file);
 
-  const response = await api.patch<GetOrganizationResponse>(
-    "/organizations/me/logo",
+  const { data } = await api.patch<OrganizationResponse>(
+    `${ORGANIZATION_ENDPOINT}/logo`,
     formData,
     {
       headers: {
@@ -37,13 +60,18 @@ export async function uploadOrganizationLogoApi(file: File) {
     },
   );
 
-  return response.data;
-}
+  return data;
+};
 
-export async function deleteOrganizationLogoApi() {
-  const response = await api.delete<GetOrganizationResponse>(
-    "/organizations/me/logo",
-  );
+/* -------------------------------------------------------------------------- */
+/*                              Delete Logo                                   */
+/* -------------------------------------------------------------------------- */
 
-  return response.data;
-}
+export const deleteOrganizationLogoApi =
+  async (): Promise<OrganizationResponse> => {
+    const { data } = await api.delete<OrganizationResponse>(
+      `${ORGANIZATION_ENDPOINT}/logo`,
+    );
+
+    return data;
+  };

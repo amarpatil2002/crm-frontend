@@ -21,7 +21,7 @@ const menuItems = [
   {
     title: "Organization",
     icon: Building2,
-    path: "/dashboard/organization",
+    path: "/organization",
   },
   {
     title: "Leads",

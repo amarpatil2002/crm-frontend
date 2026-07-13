@@ -1,23 +1,33 @@
-import { useEffect, useState } from "react";
-import { useForm, type SubmitHandler } from "react-hook-form";
+import { useEffect, useMemo, useState } from "react";
+
+import { useForm } from "react-hook-form";
+
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import Label from "../../../components/ui/Label";
-import Input from "../../../components/ui/Input";
-import ErrorText from "../../../components/ui/ErrorText";
-import Button from "../../../components/ui/Button";
-import TextArea from "../../../components/ui/TextArea";
+import { Save, Loader2 } from "lucide-react";
+
+import GeneralInformationCard from "./GeneralInformationSection";
+import AddressCard from "./AddressCard";
+import WorkspaceSettingsCard from "./WorkspaceSettingsSection";
+import LogoUploader from "./LogoUploader";
+import SubscriptionCard from "./SubscriptionCard";
 
 import { organizationProfileSchema } from "../schema/organization.schema";
+
+import {
+  updateOrganizationApi,
+  uploadOrganizationLogoApi,
+} from "../api/organization.api";
+
 import type {
   Organization,
-  UpdateOrganizationPayload,
   OrganizationProfileFormValues,
+  UpdateOrganizationPayload,
 } from "../types/organization.type";
-import { updateMyOrganizationApi } from "../api/organization.api";
 
 interface OrganizationProfileFormProps {
   organization: Organization;
+
   onUpdated: (organization: Organization) => void;
 }
 
@@ -25,307 +35,242 @@ export default function OrganizationProfileForm({
   organization,
   onUpdated,
 }: OrganizationProfileFormProps) {
-  const [apiError, setApiError] = useState("");
-  const [successMessage, setSuccessMessage] = useState("");
+  const [saving, setSaving] = useState(false);
 
-  const defaultValues: OrganizationProfileFormValues = {
-    name: organization.name ?? "",
-    website: organization.website ?? "",
-    email: organization.email ?? "",
-    phone: organization.phone ?? "",
-    industry: organization.industry ?? "",
-    description: organization.description ?? "",
+  const [logoUploading, setLogoUploading] = useState(false);
 
-    address: {
-      street: organization.address?.street ?? "",
-      city: organization.address?.city ?? "",
-      state: organization.address?.state ?? "",
-      country: organization.address?.country ?? "",
-      zipCode: organization.address?.zipCode ?? "",
-    },
+  /* -------------------------------------------------------------------------- */
+  /*                               Default Values                               */
+  /* -------------------------------------------------------------------------- */
 
-    settings: {
-      timezone: organization.settings?.timezone ?? "Asia/Kolkata",
-      language: organization.settings?.language ?? "en",
-      currency: organization.settings?.currency ?? "INR",
-    },
-  };
+  const defaultValues = useMemo<OrganizationProfileFormValues>(
+    () => ({
+      name: organization.name ?? "",
+
+      website: organization.website ?? "",
+
+      email: organization.email ?? "",
+
+      phone: organization.phone ?? "",
+
+      industry: organization.industry ?? "",
+
+      description: organization.description ?? "",
+
+      address: {
+        street: organization.address?.street ?? "",
+
+        city: organization.address?.city ?? "",
+
+        state: organization.address?.state ?? "",
+
+        country: organization.address?.country ?? "",
+
+        zipCode: organization.address?.zipCode ?? "",
+      },
+
+      settings: {
+        timezone: organization.settings.timezone,
+
+        language: organization.settings.language,
+
+        currency: organization.settings.currency,
+      },
+    }),
+    [organization],
+  );
+
+  /* -------------------------------------------------------------------------- */
 
   const {
     register,
+
     handleSubmit,
+
     reset,
-    formState: { errors, isSubmitting, isDirty },
+
+    formState: {
+      errors,
+
+      isDirty,
+    },
   } = useForm<OrganizationProfileFormValues>({
     resolver: yupResolver(organizationProfileSchema),
+
     defaultValues,
-    mode: "onSubmit",
-    reValidateMode: "onChange",
   });
+
+  /* -------------------------------------------------------------------------- */
+  /*                          Prevent Infinite Loop                             */
+  /* -------------------------------------------------------------------------- */
 
   useEffect(() => {
     reset(defaultValues);
   }, [defaultValues, reset]);
 
-  const onSubmit: SubmitHandler<OrganizationProfileFormValues> = async (
-    values,
-  ) => {
+  /* -------------------------------------------------------------------------- */
+  /*                            Update Organization                             */
+  /* -------------------------------------------------------------------------- */
+
+  const onSubmit = async (values: OrganizationProfileFormValues) => {
     try {
-      setApiError("");
-      setSuccessMessage("");
+      setSaving(true);
 
       const payload: UpdateOrganizationPayload = {
         name: values.name,
+
         website: values.website || null,
+
         email: values.email,
+
         phone: values.phone || null,
+
         industry: values.industry || null,
+
         description: values.description || null,
+
         address: {
           street: values.address.street || null,
+
           city: values.address.city || null,
+
           state: values.address.state || null,
+
           country: values.address.country || null,
+
           zipCode: values.address.zipCode || null,
         },
+
         settings: {
           timezone: values.settings.timezone,
+
           language: values.settings.language,
+
           currency: values.settings.currency,
         },
       };
 
-      const response = await updateMyOrganizationApi(payload);
+      const response = await updateOrganizationApi(payload);
 
       onUpdated(response.data);
-      setSuccessMessage("Organization profile updated successfully.");
-    } catch (error: any) {
-      const message =
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to update organization profile.";
-      setApiError(message);
+
+      reset({
+        ...values,
+      });
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setSaving(false);
     }
   };
 
+  /* -------------------------------------------------------------------------- */
+  /*                               Upload Logo                                  */
+  /* -------------------------------------------------------------------------- */
+
+  const handleLogoUpload = async (file: File | null) => {
+    if (!file) return;
+
+    try {
+      setLogoUploading(true);
+
+      const response = await uploadOrganizationLogoApi(file);
+
+      onUpdated(response.data);
+    } catch (error) {
+      console.error(error);
+    } finally {
+      setLogoUploading(false);
+    }
+  };
+  /* -------------------------------------------------------------------------- */
+  /*                                   Render                                   */
+  /* -------------------------------------------------------------------------- */
+
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
-      {apiError ? (
-        <div className="rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-600">
-          {apiError}
-        </div>
-      ) : null}
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      {/* General Information */}
 
-      {successMessage ? (
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-          {successMessage}
-        </div>
-      ) : null}
-
-      {/* Company details */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-slate-900">
-            Company details
-          </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Update the primary information for your organization.
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <Label htmlFor="name">Organization name</Label>
-            <Input
-              id="name"
-              {...register("name")}
-              error={Boolean(errors.name)}
-            />
-            <ErrorText message={errors.name?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="email">Business email</Label>
-            <Input
-              id="email"
-              type="email"
-              {...register("email")}
-              error={Boolean(errors.email)}
-            />
-            <ErrorText message={errors.email?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="phone">Phone number</Label>
-            <Input
-              id="phone"
-              {...register("phone")}
-              error={Boolean(errors.phone)}
-            />
-            <ErrorText message={errors.phone?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="website">Website</Label>
-            <Input
-              id="website"
-              placeholder="https://yourcompany.com"
-              {...register("website")}
-              error={Boolean(errors.website)}
-            />
-            <ErrorText message={errors.website?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="industry">Industry</Label>
-            <Input
-              id="industry"
-              placeholder="Software / SaaS"
-              {...register("industry")}
-              error={Boolean(errors.industry)}
-            />
-            <ErrorText message={errors.industry?.message} />
-          </div>
-
-          <div className="md:col-span-2">
-            <Label htmlFor="description">Description</Label>
-            <TextArea
-              id="description"
-              rows={4}
-              placeholder="Write a short description about your organization"
-              {...register("description")}
-              error={Boolean(errors.description)}
-            />
-            <ErrorText message={errors.description?.message} />
-          </div>
-        </div>
-      </section>
+      <GeneralInformationCard register={register} errors={errors} />
 
       {/* Address */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-slate-900">Address</h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Set the business location details for invoices, reports, and
-            workspace settings.
-          </p>
-        </div>
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-          <div className="md:col-span-2">
-            <Label htmlFor="address.street">Street</Label>
-            <Input
-              id="address.street"
-              {...register("address.street")}
-              error={Boolean(errors.address?.street)}
-            />
-            <ErrorText message={errors.address?.street?.message} />
-          </div>
+      <AddressCard register={register} errors={errors} />
 
-          <div>
-            <Label htmlFor="address.city">City</Label>
-            <Input
-              id="address.city"
-              {...register("address.city")}
-              error={Boolean(errors.address?.city)}
-            />
-            <ErrorText message={errors.address?.city?.message} />
-          </div>
+      {/* Workspace Settings */}
 
-          <div>
-            <Label htmlFor="address.state">State</Label>
-            <Input
-              id="address.state"
-              {...register("address.state")}
-              error={Boolean(errors.address?.state)}
-            />
-            <ErrorText message={errors.address?.state?.message} />
-          </div>
+      <WorkspaceSettingsCard register={register} errors={errors} />
 
-          <div>
-            <Label htmlFor="address.country">Country</Label>
-            <Input
-              id="address.country"
-              {...register("address.country")}
-              error={Boolean(errors.address?.country)}
-            />
-            <ErrorText message={errors.address?.country?.message} />
-          </div>
+      {/* Bottom Section */}
 
-          <div>
-            <Label htmlFor="address.zipCode">Zip code</Label>
-            <Input
-              id="address.zipCode"
-              {...register("address.zipCode")}
-              error={Boolean(errors.address?.zipCode)}
-            />
-            <ErrorText message={errors.address?.zipCode?.message} />
-          </div>
-        </div>
-      </section>
+      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
+        {/* Logo */}
 
-      {/* Workspace preferences */}
-      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6">
-          <h3 className="text-lg font-semibold text-slate-900">
-            Workspace preferences
-          </h3>
-          <p className="mt-1 text-sm text-slate-500">
-            Configure default timezone, language, and currency for this
-            organization.
-          </p>
-        </div>
+        <LogoUploader
+          logo={organization.logo}
+          loading={logoUploading}
+          onFileSelect={handleLogoUpload}
+        />
 
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
-          <div>
-            <Label htmlFor="settings.timezone">Timezone</Label>
-            <Input
-              id="settings.timezone"
-              placeholder="Asia/Kolkata"
-              {...register("settings.timezone")}
-              error={Boolean(errors.settings?.timezone)}
-            />
-            <ErrorText message={errors.settings?.timezone?.message} />
-          </div>
+        {/* Subscription */}
 
-          <div>
-            <Label htmlFor="settings.language">Language</Label>
-            <Input
-              id="settings.language"
-              placeholder="en"
-              {...register("settings.language")}
-              error={Boolean(errors.settings?.language)}
-            />
-            <ErrorText message={errors.settings?.language?.message} />
-          </div>
-
-          <div>
-            <Label htmlFor="settings.currency">Currency</Label>
-            <Input
-              id="settings.currency"
-              placeholder="USD"
-              {...register("settings.currency")}
-              error={Boolean(errors.settings?.currency)}
-            />
-            <ErrorText message={errors.settings?.currency?.message} />
-          </div>
-        </div>
-      </section>
-
-      <div className="flex items-center justify-end gap-3">
-        <Button
-          type="button"
-          variant="secondary"
-          onClick={() => reset(defaultValues)}
-          disabled={!isDirty || isSubmitting}
-        >
-          Reset
-        </Button>
-
-        <Button type="submit" loading={isSubmitting} disabled={isSubmitting}>
-          Save changes
-        </Button>
+        <SubscriptionCard organization={organization} />
       </div>
+
+      {/* Action Bar */}
+
+      <div className="sticky bottom-6 z-20 rounded-2xl border border-slate-200 bg-white p-5 shadow-lg">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-slate-900">
+              Save Organization
+            </h3>
+
+            <p className="mt-1 text-sm text-slate-500">
+              Review your changes before updating the organization profile.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              disabled={saving}
+              onClick={() => reset(defaultValues)}
+              className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Reset
+            </button>
+
+            <button
+              type="submit"
+              disabled={saving || !isDirty}
+              className="inline-flex min-w-[180px] items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+            >
+              {saving ? (
+                <>
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="h-5 w-5" />
+                  Save Changes
+                </>
+              )}
+            </button>
+          </div>
+        </div>
+      </div>
+      {/* Dirty State */}
+
+      {isDirty && (
+        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+          <p className="text-sm font-medium text-amber-700">
+            You have unsaved changes. Click <strong>Save Changes</strong> to
+            update your organization profile.
+          </p>
+        </div>
+      )}
     </form>
   );
 }
