@@ -1,25 +1,20 @@
-/* -------------------------------------------------------------------------- */
-/*                               Organization Status                          */
-/* -------------------------------------------------------------------------- */
+// ================================
+// Organization Status
+// ================================
 
-export type OrganizationStatus = "ACTIVE" | "INACTIVE" | "SUSPENDED";
+export type OrganizationStatus = "ACTIVE" | "INACTIVE";
 
-/* -------------------------------------------------------------------------- */
-/*                              Subscription Plan                             */
-/* -------------------------------------------------------------------------- */
+// ================================
+// Subscription Plan
+// ================================
 
-export type SubscriptionPlan =
-  | "FREE"
-  | "STARTER"
-  | "PRO"
-  | "BUSINESS"
-  | "ENTERPRISE";
+export type SubscriptionPlan = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
 
-/* -------------------------------------------------------------------------- */
-/*                                   Address                                  */
-/* -------------------------------------------------------------------------- */
+// ================================
+// Address
+// ================================
 
-export interface OrganizationAddress {
+export interface Address {
   street: string | null;
   city: string | null;
   state: string | null;
@@ -27,21 +22,21 @@ export interface OrganizationAddress {
   zipCode: string | null;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                  Settings                                  */
-/* -------------------------------------------------------------------------- */
+// ================================
+// Workspace Settings
+// ================================
 
-export interface OrganizationSettings {
+export interface WorkspaceSettings {
   timezone: string;
   language: string;
   currency: string;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                Subscription                                */
-/* -------------------------------------------------------------------------- */
+// ================================
+// Subscription
+// ================================
 
-export interface OrganizationSubscription {
+export interface Subscription {
   plan: SubscriptionPlan;
 
   startsAt: string;
@@ -53,23 +48,9 @@ export interface OrganizationSubscription {
   maxStorage: number;
 }
 
-/* -------------------------------------------------------------------------- */
-/*                                   Owner                                    */
-/* -------------------------------------------------------------------------- */
-
-export interface OrganizationOwner {
-  _id: string;
-
-  firstName?: string;
-
-  lastName?: string;
-
-  email?: string;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                               Organization                                 */
-/* -------------------------------------------------------------------------- */
+// ================================
+// Organization
+// ================================
 
 export interface Organization {
   _id: string;
@@ -90,13 +71,13 @@ export interface Organization {
 
   description: string | null;
 
-  address: OrganizationAddress;
+  address: Address;
 
-  settings: OrganizationSettings;
+  settings: WorkspaceSettings;
 
-  subscription: OrganizationSubscription;
+  subscription: Subscription;
 
-  owner: OrganizationOwner;
+  owner: string;
 
   status: OrganizationStatus;
 
@@ -107,128 +88,4 @@ export interface Organization {
   createdAt: string;
 
   updatedAt: string;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                           Update Organization DTO                          */
-/* -------------------------------------------------------------------------- */
-
-export interface UpdateOrganizationPayload {
-  name: string;
-
-  website: string | null;
-
-  email: string;
-
-  phone: string | null;
-
-  industry: string | null;
-
-  description: string | null;
-
-  address: OrganizationAddress;
-
-  settings: OrganizationSettings;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                            Logo Upload Response                            */
-/* -------------------------------------------------------------------------- */
-
-export interface LogoUploadResponse {
-  logo: string;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                          Organization API Response                         */
-/* -------------------------------------------------------------------------- */
-
-export interface OrganizationResponse {
-  success: boolean;
-
-  message: string;
-
-  data: Organization;
-}
-
-/* -------------------------------------------------------------------------- */
-/*                         Organization Form Values                           */
-/* -------------------------------------------------------------------------- */
-
-export interface OrganizationProfileFormValues {
-  name: string;
-
-  website: string;
-
-  email: string;
-
-  phone: string;
-
-  industry: string;
-
-  description: string;
-
-  address: {
-    street: string;
-
-    city: string;
-
-    state: string;
-
-    country: string;
-
-    zipCode: string;
-  };
-
-  settings: {
-    timezone: string;
-
-    language: string;
-
-    currency: string;
-  };
-}
-
-/* -------------------------------------------------------------------------- */
-/*                    Organization Profile Form Values                        */
-/* -------------------------------------------------------------------------- */
-
-export interface OrganizationProfileFormValues {
-  /* General Information */
-
-  name: string;
-
-  website: string;
-
-  email: string;
-
-  phone: string;
-
-  industry: string;
-
-  description: string;
-
-  /* Address */
-
-  address: {
-    street: string;
-
-    city: string;
-
-    state: string;
-
-    country: string;
-
-    zipCode: string;
-  };
-
-  /* Workspace Settings */
-
-  settings: {
-    timezone: string;
-
-    language: string;
-
-    currency: string;
-  };
 }

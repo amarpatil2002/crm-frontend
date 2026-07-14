@@ -1,276 +1,169 @@
-import { useEffect, useMemo, useState } from "react";
-
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Save, Loader2 } from "lucide-react";
+import { organizationSchema } from "../schema/organization.schema";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 
-import GeneralInformationCard from "./GeneralInformationSection";
+import type { Organization } from "../types/organization.type";
+
+import GeneralInformationSection from "./GeneralInformationSection";
 import AddressCard from "./AddressCard";
-import WorkspaceSettingsCard from "./WorkspaceSettingsSection";
-import LogoUploader from "./LogoUploader";
+import WorkspaceSettingsSection from "./WorkspaceSettingsSection";
+import OrganizationOverviewCard from "./OrganizationOverviewCard";
 import SubscriptionCard from "./SubscriptionCard";
-
-import { organizationProfileSchema } from "../schema/organization.schema";
-
-import {
-  updateOrganizationApi,
-  uploadOrganizationLogoApi,
-} from "../api/organization.api";
-
-import type {
-  Organization,
-  OrganizationProfileFormValues,
-  UpdateOrganizationPayload,
-} from "../types/organization.type";
+import LogoUploader from "./LogoUploader";
+import { updateOrganizationProfile } from "../redux/organizationSlice";
 
 interface OrganizationProfileFormProps {
   organization: Organization;
-
-  onUpdated: (organization: Organization) => void;
 }
 
-export default function OrganizationProfileForm({
+const OrganizationProfileForm = ({
   organization,
-  onUpdated,
-}: OrganizationProfileFormProps) {
-  const [saving, setSaving] = useState(false);
+}: OrganizationProfileFormProps) => {
+  const dispatch = useAppDispatch();
 
-  const [logoUploading, setLogoUploading] = useState(false);
+  const { updating } = useAppSelector((state) => state.organization);
 
-  /* -------------------------------------------------------------------------- */
-  /*                               Default Values                               */
-  /* -------------------------------------------------------------------------- */
+  const [generalEditing, setGeneralEditing] = useState(false);
 
-  const defaultValues = useMemo<OrganizationProfileFormValues>(
-    () => ({
-      name: organization.name ?? "",
+  const [addressEditing, setAddressEditing] = useState(false);
 
-      website: organization.website ?? "",
-
-      email: organization.email ?? "",
-
-      phone: organization.phone ?? "",
-
-      industry: organization.industry ?? "",
-
-      description: organization.description ?? "",
-
-      address: {
-        street: organization.address?.street ?? "",
-
-        city: organization.address?.city ?? "",
-
-        state: organization.address?.state ?? "",
-
-        country: organization.address?.country ?? "",
-
-        zipCode: organization.address?.zipCode ?? "",
-      },
-
-      settings: {
-        timezone: organization.settings.timezone,
-
-        language: organization.settings.language,
-
-        currency: organization.settings.currency,
-      },
-    }),
-    [organization],
-  );
-
-  /* -------------------------------------------------------------------------- */
+  const [workspaceEditing, setWorkspaceEditing] = useState(false);
 
   const {
     register,
-
     handleSubmit,
-
     reset,
+    formState: { errors },
+  } = useForm<Organization>({
+    resolver: yupResolver(organizationSchema),
 
-    formState: {
-      errors,
-
-      isDirty,
-    },
-  } = useForm<OrganizationProfileFormValues>({
-    resolver: yupResolver(organizationProfileSchema),
-
-    defaultValues,
+    defaultValues: organization,
   });
 
-  /* -------------------------------------------------------------------------- */
-  /*                          Prevent Infinite Loop                             */
-  /* -------------------------------------------------------------------------- */
-
   useEffect(() => {
-    reset(defaultValues);
-  }, [defaultValues, reset]);
+    reset(organization);
+  }, [organization, reset]);
 
-  /* -------------------------------------------------------------------------- */
-  /*                            Update Organization                             */
-  /* -------------------------------------------------------------------------- */
-
-  const onSubmit = async (values: OrganizationProfileFormValues) => {
+  const onSubmit = async (data: Organization) => {
     try {
-      setSaving(true);
+      await dispatch(updateOrganizationProfile(data)).unwrap();
 
-      const payload: UpdateOrganizationPayload = {
-        name: values.name,
-
-        website: values.website || null,
-
-        email: values.email,
-
-        phone: values.phone || null,
-
-        industry: values.industry || null,
-
-        description: values.description || null,
-
-        address: {
-          street: values.address.street || null,
-
-          city: values.address.city || null,
-
-          state: values.address.state || null,
-
-          country: values.address.country || null,
-
-          zipCode: values.address.zipCode || null,
-        },
-
-        settings: {
-          timezone: values.settings.timezone,
-
-          language: values.settings.language,
-
-          currency: values.settings.currency,
-        },
-      };
-
-      const response = await updateOrganizationApi(payload);
-
-      onUpdated(response.data);
-
-      reset({
-        ...values,
-      });
+      setGeneralEditing(false);
+      setAddressEditing(false);
+      setWorkspaceEditing(false);
     } catch (error) {
       console.error(error);
-    } finally {
-      setSaving(false);
     }
   };
 
-  /* -------------------------------------------------------------------------- */
-  /*                               Upload Logo                                  */
-  /* -------------------------------------------------------------------------- */
+  const cancelGeneralEdit = () => {
+    reset(organization);
 
-  const handleLogoUpload = async (file: File | null) => {
-    if (!file) return;
-
-    try {
-      setLogoUploading(true);
-
-      const response = await uploadOrganizationLogoApi(file);
-
-      onUpdated(response.data);
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLogoUploading(false);
-    }
+    setGeneralEditing(false);
   };
-  /* -------------------------------------------------------------------------- */
-  /*                                   Render                                   */
-  /* -------------------------------------------------------------------------- */
+
+  const cancelAddressEdit = () => {
+    reset(organization);
+
+    setAddressEditing(false);
+  };
+
+  const cancelWorkspaceEdit = () => {
+    reset(organization);
+
+    setWorkspaceEditing(false);
+  };
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {/* General Information */}
+      {" "}
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        {/* Left Side */}
 
-      <GeneralInformationCard register={register} errors={errors} />
+        <div className="space-y-6 xl:col-span-2">
+          <GeneralInformationSection
+            register={register}
+            errors={errors}
+            isEditing={generalEditing}
+            saving={updating}
+            onEdit={() => setGeneralEditing(true)}
+            onCancel={cancelGeneralEdit}
+          />
 
-      {/* Address */}
+          <AddressCard
+            register={register}
+            errors={errors}
+            isEditing={addressEditing}
+            saving={updating}
+            onEdit={() => setAddressEditing(true)}
+            onCancel={cancelAddressEdit}
+          />
 
-      <AddressCard register={register} errors={errors} />
+          <WorkspaceSettingsSection
+            register={register}
+            errors={errors}
+            isEditing={workspaceEditing}
+            saving={updating}
+            onEdit={() => setWorkspaceEditing(true)}
+            onCancel={cancelWorkspaceEdit}
+          />
+        </div>
 
-      {/* Workspace Settings */}
+        {/* Right Side */}
 
-      <WorkspaceSettingsCard register={register} errors={errors} />
-
-      {/* Bottom Section */}
-
-      <div className="grid gap-6 lg:grid-cols-[1fr_340px]">
-        {/* Logo */}
-
-        <LogoUploader
-          logo={organization.logo}
-          loading={logoUploading}
-          onFileSelect={handleLogoUpload}
-        />
-
-        {/* Subscription */}
-
-        <SubscriptionCard organization={organization} />
+        <div className="space-y-6">
+          <OrganizationOverviewCard organization={organization} />
+          <SubscriptionCard subscription={organization.subscription} />{" "}
+          <LogoUploader
+            logo={organization.logo}
+            disabled={
+              generalEditing || addressEditing || workspaceEditing || updating
+            }
+          />
+        </div>
       </div>
-
-      {/* Action Bar */}
-
-      <div className="sticky bottom-6 z-20 rounded-2xl border border-slate-200 bg-white p-5 shadow-lg">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      {(generalEditing || addressEditing || workspaceEditing) && (
+        <div className="sticky bottom-0 z-10 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-4 shadow-lg">
           <div>
-            <h3 className="text-lg font-semibold text-slate-900">
-              Save Organization
+            <h3 className="text-sm font-semibold text-slate-900">
+              Unsaved Changes
             </h3>
 
-            <p className="mt-1 text-sm text-slate-500">
-              Review your changes before updating the organization profile.
+            <p className="text-sm text-slate-500">
+              Save your changes before leaving this page.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
             <button
               type="button"
-              disabled={saving}
-              onClick={() => reset(defaultValues)}
-              className="rounded-xl border border-slate-300 bg-white px-6 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+              onClick={() => {
+                reset(organization);
+
+                setGeneralEditing(false);
+                setAddressEditing(false);
+                setWorkspaceEditing(false);
+              }}
+              className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
             >
-              Reset
+              Cancel
             </button>
 
             <button
               type="submit"
-              disabled={saving || !isDirty}
-              className="inline-flex min-w-[180px] items-center justify-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-indigo-300"
+              disabled={updating}
+              className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              {saving ? (
-                <>
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="h-5 w-5" />
-                  Save Changes
-                </>
-              )}
+              {updating ? "Saving..." : "Save Changes"}
             </button>
           </div>
         </div>
-      </div>
-      {/* Dirty State */}
-
-      {isDirty && (
-        <div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
-          <p className="text-sm font-medium text-amber-700">
-            You have unsaved changes. Click <strong>Save Changes</strong> to
-            update your organization profile.
-          </p>
-        </div>
-      )}
+      )}{" "}
     </form>
   );
-}
+};
+
+export default OrganizationProfileForm;

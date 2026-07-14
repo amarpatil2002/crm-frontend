@@ -26,22 +26,22 @@ const menuItems = [
   {
     title: "Leads",
     icon: Users,
-    path: "/dashboard/leads",
+    path: "/leads",
   },
   {
     title: "Deals",
     icon: BriefcaseBusiness,
-    path: "/dashboard/deals",
+    path: "/deals",
   },
   {
     title: "Tasks",
     icon: ClipboardList,
-    path: "/dashboard/tasks",
+    path: "/tasks",
   },
   {
     title: "Calendar",
     icon: CalendarCheck,
-    path: "/dashboard/calendar",
+    path: "/calendar",
   },
 ];
 

@@ -1,173 +1,84 @@
-import { useCallback, useEffect, useState } from "react";
-import { Building2, RefreshCw, AlertCircle } from "lucide-react";
+import { useEffect } from "react";
+
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+
+import { fetchOrganization } from "../redux/organizationSlice";
 
 import OrganizationProfileForm from "../components/OrganizationProfileForm";
-import OrganizationOverviewCard from "../components/OrganizationOverviewCard";
 
-import { getMyOrganizationApi } from "../api/organization.api";
+const OrganizationProfilePage = () => {
+  const dispatch = useAppDispatch();
 
-import type { Organization } from "../types/organization.type";
-
-export default function OrganizationProfilePage() {
-  const [organization, setOrganization] = useState<Organization | null>(null);
-
-  const [loading, setLoading] = useState(true);
-
-  const [error, setError] = useState("");
-
-  const fetchOrganization = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await getMyOrganizationApi();
-
-      setOrganization(response.data);
-    } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to load organization.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const { organization, loading, error } = useAppSelector(
+    (state) => state.organization,
+  );
 
   useEffect(() => {
-    fetchOrganization();
-  }, [fetchOrganization]);
-
-  /* -------------------------------- Loading ------------------------------- */
+    dispatch(fetchOrganization());
+  }, [dispatch]);
 
   if (loading) {
     return (
-      <div className="space-y-6">
-        <Header onRefresh={fetchOrganization} />
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <div className="h-10 w-10 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
 
-        <LoadingState />
+          <p className="text-sm text-slate-500">Loading organization...</p>
+        </div>
       </div>
     );
   }
 
-  /* -------------------------------- Error -------------------------------- */
-
   if (error) {
     return (
-      <div className="space-y-6">
-        <Header onRefresh={fetchOrganization} />
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="rounded-xl border border-red-200 bg-red-50 px-8 py-6 text-center">
+          <h2 className="text-lg font-semibold text-red-600">
+            Something went wrong
+          </h2>
 
-        <ErrorState message={error} onRetry={fetchOrganization} />
+          <p className="mt-2 text-sm text-red-500">{error}</p>
+        </div>
       </div>
     );
   }
 
   if (!organization) {
-    return null;
-  }
-
-  /* -------------------------------- Success ------------------------------- */
-
-  return (
-    <section className="space-y-6">
-      <Header onRefresh={fetchOrganization} />
-
-      <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <OrganizationProfileForm
-          organization={organization}
-          onUpdated={setOrganization}
-        />
-
-        <OrganizationOverviewCard organization={organization} />
-      </div>
-    </section>
-  );
-}
-
-/* ====================================================================== */
-
-interface HeaderProps {
-  onRefresh: () => void;
-}
-
-function Header({ onRefresh }: HeaderProps) {
-  return (
-    <div className="flex flex-col justify-between gap-5 lg:flex-row lg:items-center">
-      <div className="flex items-start gap-4">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-indigo-100">
-          <Building2 className="h-7 w-7 text-indigo-600" />
-        </div>
-
-        <div>
-          <h1 className="text-3xl font-bold text-slate-900">
-            Organization Profile
-          </h1>
+    return (
+      <div className="flex h-[70vh] items-center justify-center">
+        <div className="rounded-xl border border-slate-200 bg-white px-8 py-6 text-center shadow-sm">
+          <h2 className="text-lg font-semibold text-slate-800">
+            Organization Not Found
+          </h2>
 
           <p className="mt-2 text-sm text-slate-500">
-            Manage your organization information, branding, address and
-            workspace settings.
+            No organization information available.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <section className="space-y-6 p-6">
+      {/* Page Header */}
+
+      <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+        <div>
+          <h1 className="text-3xl font-bold text-slate-900">Organization</h1>
+
+          <p className="mt-1 text-sm text-slate-500">
+            Manage your organization's profile, address, logo and workspace
+            settings.
           </p>
         </div>
       </div>
 
-      <button
-        onClick={onRefresh}
-        className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-      >
-        <RefreshCw className="h-4 w-4" />
-        Refresh
-      </button>
-    </div>
+      {/* Profile Form */}
+
+      <OrganizationProfileForm organization={organization} />
+    </section>
   );
-}
+};
 
-/* ====================================================================== */
-
-function LoadingState() {
-  return (
-    <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-      <div className="space-y-6">
-        {[1, 2, 3, 4].map((item) => (
-          <div
-            key={item}
-            className="h-64 animate-pulse rounded-2xl border border-slate-200 bg-white"
-          />
-        ))}
-      </div>
-
-      <div className="h-[780px] animate-pulse rounded-2xl border border-slate-200 bg-white" />
-    </div>
-  );
-}
-
-/* ====================================================================== */
-
-interface ErrorProps {
-  message: string;
-  onRetry: () => void;
-}
-
-function ErrorState({ message, onRetry }: ErrorProps) {
-  return (
-    <div className="rounded-2xl border border-red-200 bg-red-50 p-8">
-      <div className="flex gap-4">
-        <AlertCircle className="mt-1 h-7 w-7 text-red-600" />
-
-        <div>
-          <h2 className="text-lg font-semibold text-red-700">
-            Unable to load organization
-          </h2>
-
-          <p className="mt-2 text-sm text-red-600">{message}</p>
-
-          <button
-            onClick={onRetry}
-            className="mt-5 rounded-xl bg-red-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-red-700"
-          >
-            Retry
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+export default OrganizationProfilePage;

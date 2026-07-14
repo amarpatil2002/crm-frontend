@@ -1,77 +1,42 @@
 import api from "../../../api/axios";
 
-import type {
-  Organization,
-  OrganizationResponse,
-  UpdateOrganizationPayload,
-} from "../types/organization.type";
+import type { Organization } from "../types/organization.type";
 
-/* -------------------------------------------------------------------------- */
-/*                                  Endpoints                                 */
-/* -------------------------------------------------------------------------- */
+/**
+ * Get Organization Profile
+ */
+export const getOrganizationProfile = async (): Promise<Organization> => {
+  const response = await api.get<Organization>("/organizations/me");
 
-const ORGANIZATION_ENDPOINT = "/crm/organization";
-
-/* -------------------------------------------------------------------------- */
-/*                              Get Organization                              */
-/* -------------------------------------------------------------------------- */
-
-export const getMyOrganizationApi = async (): Promise<OrganizationResponse> => {
-  const { data } = await api.get<OrganizationResponse>(
-    `${ORGANIZATION_ENDPOINT}/me`,
-  );
-
-  return data;
+  return response.data;
 };
 
-/* -------------------------------------------------------------------------- */
-/*                            Update Organization                             */
-/* -------------------------------------------------------------------------- */
+/**
+ * Update Organization
+ */
+export const updateOrganization = async (
+  data: Partial<Organization>,
+): Promise<Organization> => {
+  const response = await api.patch<Organization>("/organizations/me", data);
 
-export const updateOrganizationApi = async (
-  payload: UpdateOrganizationPayload,
-): Promise<OrganizationResponse> => {
-  const { data } = await api.patch<OrganizationResponse>(
-    `${ORGANIZATION_ENDPOINT}/me`,
-    payload,
-  );
-
-  return data;
+  return response.data;
 };
 
-/* -------------------------------------------------------------------------- */
-/*                               Upload Logo                                  */
-/* -------------------------------------------------------------------------- */
-
-export const uploadOrganizationLogoApi = async (
+/**
+ * Upload Organization Logo
+ */
+export const uploadOrganizationLogo = async (
   file: File,
-): Promise<OrganizationResponse> => {
+): Promise<{ message: string; logo: string }> => {
   const formData = new FormData();
 
   formData.append("logo", file);
 
-  const { data } = await api.patch<OrganizationResponse>(
-    `${ORGANIZATION_ENDPOINT}/logo`,
-    formData,
-    {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+  const response = await api.put("/organizations/logo", formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
     },
-  );
+  });
 
-  return data;
+  return response.data;
 };
-
-/* -------------------------------------------------------------------------- */
-/*                              Delete Logo                                   */
-/* -------------------------------------------------------------------------- */
-
-export const deleteOrganizationLogoApi =
-  async (): Promise<OrganizationResponse> => {
-    const { data } = await api.delete<OrganizationResponse>(
-      `${ORGANIZATION_ENDPOINT}/logo`,
-    );
-
-    return data;
-  };

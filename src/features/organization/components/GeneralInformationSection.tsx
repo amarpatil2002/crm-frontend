@@ -1,197 +1,180 @@
+import { Pencil, Save, X } from "lucide-react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
-import type { OrganizationProfileFormValues } from "../types/organization.type";
+import type { Organization } from "../types/organization.type";
 
-interface GeneralInformationCardProps {
-  register: UseFormRegister<OrganizationProfileFormValues>;
-  errors: FieldErrors<OrganizationProfileFormValues>;
+interface GeneralInformationSectionProps {
+  register: UseFormRegister<Organization>;
+  errors: FieldErrors<Organization>;
+
+  isEditing: boolean;
+  saving: boolean;
+
+  onEdit: () => void;
+  onCancel: () => void;
 }
 
-export default function GeneralInformationCard({
+const inputClass =
+  "w-full rounded-lg border border-slate-300 bg-white px-3 py-2 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 disabled:bg-slate-100";
+
+const labelClass = "mb-1 block text-sm font-medium text-slate-700";
+
+const errorClass = "mt-1 text-xs text-red-500";
+
+const GeneralInformationSection = ({
   register,
   errors,
-}: GeneralInformationCardProps) {
+  isEditing,
+  saving,
+  onEdit,
+  onCancel,
+}: GeneralInformationSectionProps) => {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
       {/* Header */}
 
-      <div className="border-b border-slate-200 px-6 py-5">
-        <h2 className="text-lg font-semibold text-slate-900">
-          General Information
-        </h2>
+      <div className="flex items-center justify-between border-b border-slate-200 px-6 py-4">
+        <div>
+          <h2 className="text-lg font-semibold text-slate-900">
+            General Information
+          </h2>
 
-        <p className="mt-1 text-sm text-slate-500">
-          Update your organization details.
-        </p>
+          <p className="mt-1 text-sm text-slate-500">
+            Manage your organization's basic information.
+          </p>
+        </div>
+
+        {!isEditing ? (
+          <button
+            type="button"
+            onClick={onEdit}
+            className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100"
+          >
+            <Pencil size={16} />
+            Edit
+          </button>
+        ) : (
+          <div className="flex gap-2">
+            <button
+              type="submit"
+              disabled={saving}
+              className="inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              <Save size={16} />
+
+              {saving ? "Saving..." : "Save"}
+            </button>
+
+            <button
+              type="button"
+              onClick={onCancel}
+              className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100"
+            >
+              <X size={16} />
+              Cancel
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Body */}
 
-      <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 p-6 md:grid-cols-2">
         {/* Organization Name */}
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Organization Name
-          </label>
+          <label className={labelClass}>Organization Name</label>
 
           <input
             {...register("name")}
-            placeholder="Organization name"
-            className={`h-11 w-full rounded-xl border px-4 text-sm outline-none transition
-              ${
-                errors.name
-                  ? "border-red-500"
-                  : "border-slate-300 focus:border-indigo-500"
-              }`}
+            disabled={!isEditing}
+            className={inputClass}
           />
 
-          {errors.name && (
-            <p className="mt-1 text-xs text-red-500">{errors.name.message}</p>
+          {errors.name && <p className={errorClass}>{errors.name.message}</p>}
+        </div>
+
+        {/* Website */}
+
+        <div>
+          <label className={labelClass}>Website</label>
+
+          <input
+            {...register("website")}
+            disabled={!isEditing}
+            placeholder="https://example.com"
+            className={inputClass}
+          />
+
+          {errors.website && (
+            <p className={errorClass}>{errors.website.message}</p>
           )}
         </div>
 
         {/* Email */}
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Business Email
-          </label>
+          <label className={labelClass}>Email</label>
 
           <input
             type="email"
             {...register("email")}
-            placeholder="business@email.com"
-            className={`h-11 w-full rounded-xl border px-4 text-sm outline-none transition
-              ${
-                errors.email
-                  ? "border-red-500"
-                  : "border-slate-300 focus:border-indigo-500"
-              }`}
+            disabled={!isEditing}
+            className={inputClass}
           />
 
-          {errors.email && (
-            <p className="mt-1 text-xs text-red-500">{errors.email.message}</p>
-          )}
-        </div>
-
-        {/* Website */}
-
-        <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Website
-          </label>
-
-          <input
-            {...register("website")}
-            placeholder="https://example.com"
-            className={`h-11 w-full rounded-xl border px-4 text-sm outline-none transition
-              ${
-                errors.website
-                  ? "border-red-500"
-                  : "border-slate-300 focus:border-indigo-500"
-              }`}
-          />
-
-          {errors.website && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.website.message}
-            </p>
-          )}
+          {errors.email && <p className={errorClass}>{errors.email.message}</p>}
         </div>
 
         {/* Phone */}
 
         <div>
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Phone Number
-          </label>
+          <label className={labelClass}>Phone</label>
 
           <input
             {...register("phone")}
-            placeholder="+91 9876543210"
-            className={`h-11 w-full rounded-xl border px-4 text-sm outline-none transition
-              ${
-                errors.phone
-                  ? "border-red-500"
-                  : "border-slate-300 focus:border-indigo-500"
-              }`}
+            disabled={!isEditing}
+            className={inputClass}
           />
 
-          {errors.phone && (
-            <p className="mt-1 text-xs text-red-500">{errors.phone.message}</p>
-          )}
+          {errors.phone && <p className={errorClass}>{errors.phone.message}</p>}
         </div>
 
         {/* Industry */}
 
         <div className="md:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Industry
-          </label>
+          <label className={labelClass}>Industry</label>
 
-          <select
+          <input
             {...register("industry")}
-            className="h-11 w-full rounded-xl border border-slate-300 bg-white px-4 text-sm outline-none transition focus:border-indigo-500"
-          >
-            <option value="">Select Industry</option>
-
-            <option value="Software">Software</option>
-
-            <option value="Information Technology">
-              Information Technology
-            </option>
-
-            <option value="Finance">Finance</option>
-
-            <option value="Healthcare">Healthcare</option>
-
-            <option value="Education">Education</option>
-
-            <option value="Manufacturing">Manufacturing</option>
-
-            <option value="Retail">Retail</option>
-
-            <option value="Marketing">Marketing</option>
-
-            <option value="Consulting">Consulting</option>
-
-            <option value="Other">Other</option>
-          </select>
+            disabled={!isEditing}
+            className={inputClass}
+          />
 
           {errors.industry && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.industry.message}
-            </p>
+            <p className={errorClass}>{errors.industry.message}</p>
           )}
         </div>
 
         {/* Description */}
 
         <div className="md:col-span-2">
-          <label className="mb-2 block text-sm font-medium text-slate-700">
-            Description
-          </label>
+          <label className={labelClass}>Description</label>
 
           <textarea
             rows={5}
             {...register("description")}
-            placeholder="Tell us about your organization..."
-            className={`w-full rounded-xl border px-4 py-3 text-sm outline-none transition resize-none
-              ${
-                errors.description
-                  ? "border-red-500"
-                  : "border-slate-300 focus:border-indigo-500"
-              }`}
+            disabled={!isEditing}
+            className={inputClass}
           />
 
           {errors.description && (
-            <p className="mt-1 text-xs text-red-500">
-              {errors.description.message}
-            </p>
+            <p className={errorClass}>{errors.description.message}</p>
           )}
         </div>
       </div>
-    </section>
+    </div>
   );
-}
+};
+
+export default GeneralInformationSection;

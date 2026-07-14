@@ -1,60 +1,38 @@
-import { useEffect, useRef, useState } from "react";
-import { Camera, Trash2, UploadCloud, Loader2 } from "lucide-react";
+import { Camera, Upload } from "lucide-react";
+import { useRef } from "react";
 
 interface LogoUploaderProps {
-  logo?: string | null;
-  loading?: boolean;
-  onFileSelect: (file: File | null) => void;
+  logo: string;
+  disabled?: boolean;
 }
 
-const MAX_FILE_SIZE = 2 * 1024 * 1024;
-
-export default function LogoUploader({
-  logo,
-  loading = false,
-  onFileSelect,
-}: LogoUploaderProps) {
+const LogoUploader = ({ logo, disabled = false }: LogoUploaderProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const [preview, setPreview] = useState("");
+  const handleClick = () => {
+    if (disabled) return;
 
-  const [dragging, setDragging] = useState(false);
-
-  useEffect(() => {
-    setPreview(logo || "");
-  }, [logo]);
-
-  const handleFile = (file: File | null) => {
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      alert("Please select a valid image.");
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      alert("Image size should be less than 2 MB.");
-      return;
-    }
-
-    setPreview(URL.createObjectURL(file));
-
-    onFileSelect(file);
+    inputRef.current?.click();
   };
 
-  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
 
-    setDragging(false);
+    if (!file) return;
 
-    handleFile(e.dataTransfer.files[0]);
+    console.log(file);
+
+    /**
+     * Call Upload API here
+     *
+     * dispatch(uploadOrganizationLogo(file))
+     *
+     */
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      {/* Header */}
-
-      <div className="border-b border-slate-200 px-6 py-5">
+    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-200 px-6 py-4">
         <h2 className="text-lg font-semibold text-slate-900">
           Organization Logo
         </h2>
@@ -62,85 +40,49 @@ export default function LogoUploader({
         <p className="mt-1 text-sm text-slate-500">Upload your company logo.</p>
       </div>
 
-      {/* Body */}
-
-      <div className="p-6">
-        <div
-          onDrop={handleDrop}
-          onDragOver={(e) => {
-            e.preventDefault();
-            setDragging(true);
-          }}
-          onDragLeave={() => setDragging(false)}
-          className={`flex flex-col items-center justify-center rounded-2xl border-2 border-dashed p-8 transition
-
-          ${dragging ? "border-indigo-500 bg-indigo-50" : "border-slate-300"}`}
-        >
-          {/* Preview */}
-
-          <div className="relative">
-            {preview ? (
-              <img
-                src={preview}
-                alt="Organization Logo"
-                className="h-36 w-36 rounded-2xl border border-slate-200 object-cover shadow-sm"
-              />
-            ) : (
-              <div className="flex h-36 w-36 items-center justify-center rounded-2xl bg-slate-100">
-                <Camera className="h-12 w-12 text-slate-400" />
-              </div>
-            )}
-
-            {preview && (
-              <button
-                type="button"
-                onClick={() => {
-                  setPreview("");
-
-                  onFileSelect(null);
-                }}
-                className="absolute -right-2 -top-2 rounded-full bg-red-500 p-2 text-white shadow-lg transition hover:bg-red-600"
-              >
-                <Trash2 size={16} />
-              </button>
-            )}
-          </div>
-
-          <input
-            hidden
-            ref={inputRef}
-            type="file"
-            accept="image/*"
-            onChange={(e) => handleFile(e.target.files?.[0] || null)}
-          />
+      <div className="flex flex-col items-center p-6">
+        <div className="relative">
+          {logo ? (
+            <img
+              src={logo}
+              alt="Organization Logo"
+              className="h-28 w-28 rounded-full border object-cover"
+            />
+          ) : (
+            <div className="flex h-28 w-28 items-center justify-center rounded-full bg-slate-100">
+              <Camera size={36} className="text-slate-400" />
+            </div>
+          )}
 
           <button
             type="button"
-            disabled={loading}
-            onClick={() => inputRef.current?.click()}
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+            disabled={disabled}
+            onClick={handleClick}
+            className="absolute bottom-0 right-0 rounded-full bg-blue-600 p-2 text-white shadow hover:bg-blue-700 disabled:opacity-50"
           >
-            {loading ? (
-              <>
-                <Loader2 className="h-5 w-5 animate-spin" />
-                Uploading...
-              </>
-            ) : (
-              <>
-                <UploadCloud className="h-5 w-5" />
-
-                {preview ? "Change Logo" : "Upload Logo"}
-              </>
-            )}
+            <Upload size={16} />
           </button>
-
-          <p className="mt-4 text-center text-sm text-slate-500">
-            Drag & Drop your logo here
-          </p>
-
-          <p className="text-xs text-slate-400">PNG • JPG • WEBP • Max 2 MB</p>
         </div>
+
+        <button
+          type="button"
+          disabled={disabled}
+          onClick={handleClick}
+          className="mt-5 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:bg-slate-100 disabled:opacity-50"
+        >
+          Upload Logo
+        </button>
+
+        <input
+          ref={inputRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={handleFileChange}
+        />
       </div>
-    </section>
+    </div>
   );
-}
+};
+
+export default LogoUploader;
