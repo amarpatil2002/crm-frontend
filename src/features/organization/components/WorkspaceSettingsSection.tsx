@@ -1,10 +1,13 @@
 import { Pencil, Save, X } from "lucide-react";
 import type { FieldErrors, UseFormRegister } from "react-hook-form";
 
-import type { Organization } from "../types/organization.type";
+import type {
+  Organization,
+  OrganizationFormValues,
+} from "../types/organization.type";
 
 interface WorkspaceSettingsSectionProps {
-  register: UseFormRegister<Organization>;
+  register: UseFormRegister<OrganizationFormValues>;
   errors: FieldErrors<Organization>;
 
   isEditing: boolean;

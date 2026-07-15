@@ -5,7 +5,10 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { organizationSchema } from "../schema/organization.schema";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 
-import type { Organization } from "../types/organization.type";
+import type {
+  Organization,
+  OrganizationFormValues,
+} from "../types/organization.type";
 
 import GeneralInformationSection from "./GeneralInformationSection";
 import AddressCard from "./AddressCard";
@@ -37,7 +40,7 @@ const OrganizationProfileForm = ({
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<Organization>({
+  } = useForm<OrganizationFormValues>({
     resolver: yupResolver(organizationSchema),
 
     defaultValues: organization,
@@ -47,7 +50,7 @@ const OrganizationProfileForm = ({
     reset(organization);
   }, [organization, reset]);
 
-  const onSubmit = async (data: Organization) => {
+  const onSubmit = async (data: OrganizationFormValues) => {
     try {
       await dispatch(updateOrganizationProfile(data)).unwrap();
 
@@ -125,43 +128,6 @@ const OrganizationProfileForm = ({
           />
         </div>
       </div>
-      {(generalEditing || addressEditing || workspaceEditing) && (
-        <div className="sticky bottom-0 z-10 flex items-center justify-between rounded-xl border border-slate-200 bg-white px-6 py-4 shadow-lg">
-          <div>
-            <h3 className="text-sm font-semibold text-slate-900">
-              Unsaved Changes
-            </h3>
-
-            <p className="text-sm text-slate-500">
-              Save your changes before leaving this page.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => {
-                reset(organization);
-
-                setGeneralEditing(false);
-                setAddressEditing(false);
-                setWorkspaceEditing(false);
-              }}
-              className="rounded-lg border border-slate-300 px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
-            >
-              Cancel
-            </button>
-
-            <button
-              type="submit"
-              disabled={updating}
-              className="rounded-lg bg-blue-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              {updating ? "Saving..." : "Save Changes"}
-            </button>
-          </div>
-        </div>
-      )}{" "}
     </form>
   );
 };

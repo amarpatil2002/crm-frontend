@@ -2,7 +2,7 @@ import { Camera, Upload } from "lucide-react";
 import { useRef } from "react";
 
 interface LogoUploaderProps {
-  logo: string;
+  logo: string | null;
   disabled?: boolean;
 }
 

@@ -5,7 +5,10 @@ import {
   updateOrganization,
 } from "../api/organization.api";
 
-import type { Organization } from "../types/organization.type";
+import type {
+  Organization,
+  OrganizationFormValues,
+} from "../types/organization.type";
 
 interface OrganizationState {
   organization: Organization | null;
@@ -27,17 +30,35 @@ const initialState: OrganizationState = {
   error: null,
 };
 
+/**
+ * Fetch Organization
+ */
 export const fetchOrganization = createAsyncThunk(
   "organization/fetchOrganization",
-  async () => {
-    return await getOrganizationProfile();
+  async (_, thunkAPI) => {
+    try {
+      return await getOrganizationProfile();
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ?? "Failed to fetch organization.",
+      );
+    }
   },
 );
 
+/**
+ * Update Organization
+ */
 export const updateOrganizationProfile = createAsyncThunk(
   "organization/updateOrganization",
-  async (data: Partial<Organization>) => {
-    return await updateOrganization(data);
+  async (data: OrganizationFormValues, thunkAPI) => {
+    try {
+      return await updateOrganization(data);
+    } catch (error: any) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message ?? "Failed to update organization.",
+      );
+    }
   },
 );
 
@@ -51,6 +72,10 @@ const organizationSlice = createSlice({
   extraReducers: (builder) => {
     builder
 
+      // ===============================
+      // Fetch Organization
+      // ===============================
+
       .addCase(fetchOrganization.pending, (state) => {
         state.loading = true;
 
@@ -63,11 +88,16 @@ const organizationSlice = createSlice({
         state.organization = action.payload;
       })
 
-      .addCase(fetchOrganization.rejected, (state) => {
+      .addCase(fetchOrganization.rejected, (state, action) => {
         state.loading = false;
 
-        state.error = "Failed to fetch organization.";
+        state.error =
+          (action.payload as string) ?? "Failed to fetch organization.";
       })
+
+      // ===============================
+      // Update Organization
+      // ===============================
 
       .addCase(updateOrganizationProfile.pending, (state) => {
         state.updating = true;
@@ -81,10 +111,11 @@ const organizationSlice = createSlice({
         state.organization = action.payload;
       })
 
-      .addCase(updateOrganizationProfile.rejected, (state) => {
+      .addCase(updateOrganizationProfile.rejected, (state, action) => {
         state.updating = false;
 
-        state.error = "Failed to update organization.";
+        state.error =
+          (action.payload as string) ?? "Failed to update organization.";
       });
   },
 });

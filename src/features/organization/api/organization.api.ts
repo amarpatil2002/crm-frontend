@@ -1,14 +1,16 @@
 import api from "../../../api/axios";
 
 import type { Organization } from "../types/organization.type";
+import type { ApiResponse } from "../../../types/api-response.type";
 
 /**
  * Get Organization Profile
  */
 export const getOrganizationProfile = async (): Promise<Organization> => {
-  const response = await api.get<Organization>("/organizations/me");
-
-  return response.data;
+  const response = await api.get<ApiResponse<Organization>>(
+    "/crm/organization/me",
+  );
+  return response.data.data;
 };
 
 /**
@@ -17,9 +19,12 @@ export const getOrganizationProfile = async (): Promise<Organization> => {
 export const updateOrganization = async (
   data: Partial<Organization>,
 ): Promise<Organization> => {
-  const response = await api.patch<Organization>("/organizations/me", data);
+  const response = await api.patch<ApiResponse<Organization>>(
+    "/crm/organization/me",
+    data,
+  );
 
-  return response.data;
+  return response.data.data;
 };
 
 /**
@@ -32,7 +37,7 @@ export const uploadOrganizationLogo = async (
 
   formData.append("logo", file);
 
-  const response = await api.put("/organizations/logo", formData, {
+  const response = await api.put("/crm/organization/logo", formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },

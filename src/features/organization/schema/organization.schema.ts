@@ -1,97 +1,57 @@
 import * as yup from "yup";
 
-/**
- * Address Schema
- */
-export const addressSchema = yup.object({
-  street: yup
-    .string()
-    .trim()
-    .nullable()
-    .max(150, "Street cannot exceed 150 characters"),
+import type { OrganizationFormValues } from "../types/organization.type";
 
-  city: yup
-    .string()
-    .trim()
-    .nullable()
-    .max(100, "City cannot exceed 100 characters"),
+export const organizationSchema: yup.ObjectSchema<OrganizationFormValues> =
+  yup.object({
+    name: yup
+      .string()
+      .required("Organization name is required")
+      .max(100, "Organization name cannot exceed 100 characters"),
 
-  state: yup
-    .string()
-    .trim()
-    .nullable()
-    .max(100, "State cannot exceed 100 characters"),
+    email: yup
+      .string()
+      .email("Please enter a valid email")
+      .required("Email is required"),
 
-  country: yup
-    .string()
-    .trim()
-    .nullable()
-    .max(100, "Country cannot exceed 100 characters"),
+    phone: yup.string().nullable().defined(),
 
-  zipCode: yup
-    .string()
-    .trim()
-    .nullable()
-    .max(20, "Zip code cannot exceed 20 characters"),
-});
+    website: yup
+      .string()
+      .nullable()
+      .defined()
+      .test(
+        "website",
+        "Please enter a valid website",
+        (value) =>
+          !value || /^(https?:\/\/)?([\w-]+\.)+[\w-]{2,}(\/.*)?$/i.test(value),
+      ),
 
-/**
- * Workspace Settings Schema
- */
-export const workspaceSettingsSchema = yup.object({
-  timezone: yup.string().required("Timezone is required"),
+    industry: yup.string().nullable().defined(),
 
-  language: yup.string().required("Language is required"),
+    description: yup
+      .string()
+      .nullable()
+      .defined()
+      .max(500, "Description cannot exceed 500 characters"),
 
-  currency: yup.string().required("Currency is required"),
-});
+    address: yup.object({
+      street: yup.string().nullable().defined(),
 
-/**
- * Organization Schema
- */
-export const organizationSchema = yup.object({
-  name: yup
-    .string()
-    .trim()
-    .required("Organization name is required")
-    .min(3, "Minimum 3 characters")
-    .max(100, "Maximum 100 characters"),
+      city: yup.string().nullable().defined(),
 
-  website: yup
-    .string()
-    .trim()
-    .transform((value) => (value === "" ? null : value))
-    .nullable()
-    .url("Invalid website"),
+      state: yup.string().nullable().defined(),
 
-  email: yup
-    .string()
-    .trim()
-    .required("Email is required")
-    .email("Invalid email"),
+      country: yup.string().nullable().defined(),
 
-  phone: yup
-    .string()
-    .trim()
-    .transform((value) => (value === "" ? null : value))
-    .nullable()
-    .matches(/^[0-9+\-\s()]*$/, "Invalid phone number"),
+      zipCode: yup.string().nullable().defined(),
+    }),
 
-  industry: yup
-    .string()
-    .trim()
-    .transform((value) => (value === "" ? null : value))
-    .nullable()
-    .max(100),
+    settings: yup.object({
+      timezone: yup.string().required("Timezone is required"),
 
-  description: yup
-    .string()
-    .trim()
-    .transform((value) => (value === "" ? null : value))
-    .nullable()
-    .max(500),
+      language: yup.string().required("Language is required"),
 
-  address: addressSchema.required(),
-
-  settings: workspaceSettingsSchema.required(),
-});
+      currency: yup.string().required("Currency is required"),
+    }),
+  });

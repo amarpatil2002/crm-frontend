@@ -1,18 +1,18 @@
-// ================================
+// ========================================
 // Organization Status
-// ================================
+// ========================================
 
 export type OrganizationStatus = "ACTIVE" | "INACTIVE";
 
-// ================================
+// ========================================
 // Subscription Plan
-// ================================
+// ========================================
 
 export type SubscriptionPlan = "FREE" | "STARTER" | "PRO" | "ENTERPRISE";
 
-// ================================
+// ========================================
 // Address
-// ================================
+// ========================================
 
 export interface Address {
   street: string | null;
@@ -22,9 +22,9 @@ export interface Address {
   zipCode: string | null;
 }
 
-// ================================
+// ========================================
 // Workspace Settings
-// ================================
+// ========================================
 
 export interface WorkspaceSettings {
   timezone: string;
@@ -32,25 +32,36 @@ export interface WorkspaceSettings {
   currency: string;
 }
 
-// ================================
+// ========================================
 // Subscription
-// ================================
+// ========================================
 
 export interface Subscription {
   plan: SubscriptionPlan;
-
   startsAt: string;
-
   expiresAt: string | null;
-
   maxUsers: number;
-
   maxStorage: number;
 }
 
-// ================================
+// ========================================
+// Owner
+// ========================================
+
+export interface OrganizationOwner {
+  _id: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  email: string;
+  phone: string | null;
+  avatar: string | null;
+  status: OrganizationStatus;
+}
+
+// ========================================
 // Organization
-// ================================
+// ========================================
 
 export interface Organization {
   _id: string;
@@ -59,13 +70,13 @@ export interface Organization {
 
   slug: string;
 
-  logo: string;
-
-  website: string | null;
+  logo: string | null;
 
   email: string;
 
   phone: string | null;
+
+  website: string | null;
 
   industry: string | null;
 
@@ -77,15 +88,36 @@ export interface Organization {
 
   subscription: Subscription;
 
-  owner: string;
-
   status: OrganizationStatus;
 
-  isDeleted: boolean;
+  owner: OrganizationOwner;
 
-  deletedAt: string | null;
+  memberCount: number;
 
   createdAt: string;
 
   updatedAt: string;
+}
+
+// ========================================
+// Organization Form Values
+// (Only editable fields)
+// ========================================
+
+export interface OrganizationFormValues {
+  name: string;
+
+  email: string;
+
+  phone: string | null;
+
+  website: string | null;
+
+  industry: string | null;
+
+  description: string | null;
+
+  address: Address;
+
+  settings: WorkspaceSettings;
 }
