@@ -1,10 +1,17 @@
 import { Bell, Menu, Search, ChevronDown } from "lucide-react";
+import { useAppSelector } from "../../../app/hooks";
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
 }
 
 export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
+  const { profile, loading, uploading, error } = useAppSelector(
+    (state) => state.profile,
+  );
+
+  console.log(profile);
+
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
       {/* Left */}

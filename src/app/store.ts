@@ -1,11 +1,13 @@
 import { configureStore } from "@reduxjs/toolkit";
-import authReducer from "../app/authSlice";
+import authReducer from "../features/auth/redux/authSlice";
 import organizationReducer from "../features/organization/redux/organizationSlice";
+import profileReducer from "../features/profile/redux/profileSlice";
 
 export const store = configureStore({
   reducer: {
     auth: authReducer,
     organization: organizationReducer,
+    profile: profileReducer,
   },
   devTools: import.meta.env.DEV,
 });

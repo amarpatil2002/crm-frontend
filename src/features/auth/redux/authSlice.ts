@@ -1,6 +1,6 @@
 import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import type { AuthState, User } from "../features/auth/types/auth.type";
-import { storage } from "../utils/storage";
+import type { AuthState, User } from "../types/auth.type";
+import { storage } from "../../../utils/storage";
 
 interface SetCredentialsPayload {
   user: User;

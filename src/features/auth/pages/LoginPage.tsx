@@ -14,7 +14,7 @@ import PasswordInput from "../components/PasswordInput";
 
 import { loginSchema, type LoginFormValues } from "../schema/auth.schema";
 import { loginApi } from "../../../features/auth/api/auth.api";
-import { setCredentials } from "../../../app/authSlice";
+import { setCredentials } from "../redux/authSlice";
 import type { AppDispatch } from "../../../app/store";
 
 type LoginLocationState = {
