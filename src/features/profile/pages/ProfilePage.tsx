@@ -15,6 +15,8 @@ const ProfilePage = () => {
     dispatch(fetchProfile());
   }, [dispatch]);
 
+  console.log(profile);
+
   if (loading) {
     return (
       <div className="flex h-[70vh] items-center justify-center">

@@ -1,22 +1,30 @@
-import { Bell, Menu, Search, ChevronDown } from "lucide-react";
-import { useAppSelector } from "../../../app/hooks";
+import { useEffect } from "react";
+import { Bell, Menu, Search } from "lucide-react";
+
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+
+import { fetchProfile } from "../../profile/redux/profileSlice";
+import ProfileDropdown from "../../profile/components/ProfileDropdown";
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
 }
 
 export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
-  const { profile, loading, uploading, error } = useAppSelector(
-    (state) => state.profile,
-  );
+  const dispatch = useAppDispatch();
 
-  console.log(profile);
+  const { profile, loading } = useAppSelector((state) => state.profile);
+
+  useEffect(() => {
+    if (!profile) {
+      dispatch(fetchProfile());
+    }
+  }, [dispatch, profile]);
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
       {/* Left */}
       <div className="flex items-center gap-4">
-        {/* Mobile Menu */}
         <button
           onClick={onMenuClick}
           className="rounded-lg p-2 text-slate-600 transition hover:bg-slate-100 lg:hidden"
@@ -27,7 +35,10 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Dashboard</h1>
 
-          <p className="text-sm text-slate-500">Welcome back, Amarjit 👋</p>
+          <p className="text-sm text-slate-500">
+            Welcome back,
+            {profile ? ` ${profile.firstName} 👋` : " User 👋"}
+          </p>
         </div>
       </div>
 
@@ -48,30 +59,25 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
         </div>
 
         {/* Notifications */}
-        <button className="relative rounded-xl border border-slate-200 bg-white p-2 hover:bg-slate-100">
+        <button className="relative rounded-xl border border-slate-200 bg-white p-2 transition hover:bg-slate-100">
           <Bell className="h-5 w-5 text-slate-600" />
 
           <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500" />
         </button>
 
-        {/* User */}
-        <button className="flex items-center gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2 hover:bg-slate-100">
-          <img
-            src="https://i.pravatar.cc/150?img=12"
-            alt="User"
-            className="h-10 w-10 rounded-full"
-          />
-
-          <div className="hidden md:block">
-            <p className="text-sm font-semibold text-slate-800">
-              Amarjit Patil
-            </p>
-
-            <p className="text-xs text-slate-500">Admin</p>
-          </div>
-
-          <ChevronDown className="hidden h-4 w-4 text-slate-500 md:block" />
-        </button>
+        {/* Profile */}
+        {loading ? (
+          <div className="h-10 w-10 animate-pulse rounded-full bg-slate-200" />
+        ) : (
+          profile && (
+            <ProfileDropdown
+              profile={profile}
+              onLogout={() => {
+                // Dispatch logout here
+              }}
+            />
+          )
+        )}
       </div>
     </header>
   );
