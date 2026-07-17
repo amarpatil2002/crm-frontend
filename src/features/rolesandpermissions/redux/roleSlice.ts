@@ -35,17 +35,11 @@ interface RoleState {
 
 const initialState: RoleState = {
   roles: [],
-
   selectedRole: null,
-
   loading: false,
-
   creating: false,
-
   updating: false,
-
   deleting: false,
-
   error: null,
 };
 

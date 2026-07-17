@@ -8,7 +8,7 @@ import { fetchRole, fetchRoles } from "../redux/roleSlice";
 import type { Role } from "../types/role.type";
 
 import RolesTable from "../components/RolesTable";
-import RoleDetailsDrawer from "../components/RoleDetailsSection";
+import RoleDetailsSection from "../components/RoleDetailsSection";
 
 const RolesPermissionsPage = () => {
   const dispatch = useAppDispatch();
@@ -23,11 +23,14 @@ const RolesPermissionsPage = () => {
     dispatch(fetchRoles());
   }, [dispatch]);
 
-  const handleViewRole = async (roleId: string) => {
+  /**
+   * View Role
+   */
+  const handleViewRole = async (role: Role) => {
     try {
-      const role = await dispatch(fetchRole(roleId)).unwrap();
+      const response = await dispatch(fetchRole(role._id)).unwrap();
 
-      setSelectedRole(role);
+      setSelectedRole(response);
 
       setDrawerOpen(true);
     } catch (error) {
@@ -35,6 +38,36 @@ const RolesPermissionsPage = () => {
     }
   };
 
+  /**
+   * Create Role
+   */
+  const handleCreateRole = () => {
+    console.log("Create Role");
+
+    // Open Create Role Modal
+  };
+
+  /**
+   * Edit Role
+   */
+  const handleEditRole = (role: Role) => {
+    console.log("Edit Role", role);
+
+    // Open Edit Modal
+  };
+
+  /**
+   * Delete Role
+   */
+  const handleDeleteRole = (role: Role) => {
+    console.log("Delete Role", role);
+
+    // Open Delete Confirmation
+  };
+
+  /**
+   * Close Drawer
+   */
   const handleCloseDrawer = () => {
     setDrawerOpen(false);
 
@@ -43,7 +76,7 @@ const RolesPermissionsPage = () => {
 
   return (
     <>
-      <section className="space-y-6 rounded-2xl">
+      <section className="space-y-6">
         {/* Header */}
 
         <div className="flex items-center justify-between">
@@ -53,32 +86,69 @@ const RolesPermissionsPage = () => {
             </h1>
 
             <p className="mt-1 text-sm text-slate-500">
-              Manage system and custom roles.
+              Manage system roles and custom roles.
             </p>
           </div>
 
-          <button className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700">
+          <button
+            type="button"
+            onClick={handleCreateRole}
+            className="flex items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-indigo-700"
+          >
             <Plus size={16} />
             Create Role
           </button>
         </div>
 
+        {/* Loading */}
+
         {loading && (
-          <div className="flex h-52 items-center justify-center">
-            Loading...
+          <div className="flex h-60 items-center justify-center rounded-xl border border-slate-200 bg-white">
+            <div className="flex flex-col items-center gap-4">
+              <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent" />
+
+              <p className="text-sm text-slate-500">Loading roles...</p>
+            </div>
           </div>
         )}
 
-        {error && (
-          <div className="rounded-xl bg-red-50 p-4 text-red-600">{error}</div>
+        {/* Error */}
+
+        {!loading && error && (
+          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
+            {error}
+          </div>
         )}
 
-        {!loading && !error && (
-          <RolesTable roles={roles} onView={handleViewRole} />
+        {/* Empty */}
+
+        {!loading && !error && roles.length === 0 && (
+          <div className="rounded-xl border border-dashed border-slate-300 bg-white py-16 text-center">
+            <h3 className="text-lg font-semibold text-slate-900">
+              No Roles Found
+            </h3>
+
+            <p className="mt-2 text-sm text-slate-500">
+              Create your first custom role.
+            </p>
+          </div>
+        )}
+
+        {/* Table */}
+
+        {!loading && !error && roles.length > 0 && (
+          <RolesTable
+            roles={roles}
+            onView={handleViewRole}
+            onEdit={handleEditRole}
+            onDelete={handleDeleteRole}
+          />
         )}
       </section>
 
-      <RoleDetailsDrawer
+      {/* Drawer */}
+
+      <RoleDetailsSection
         open={drawerOpen}
         role={selectedRole}
         onClose={handleCloseDrawer}

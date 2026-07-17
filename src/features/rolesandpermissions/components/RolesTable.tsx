@@ -1,4 +1,4 @@
-import { Eye, MoreHorizontal, Lock, ShieldCheck } from "lucide-react";
+import { Eye, ShieldCheck, Pencil, Trash2 } from "lucide-react";
 
 import type { Role } from "../types/role.type";
 
@@ -28,6 +28,8 @@ const RolesTable = ({ roles, onView, onEdit, onDelete }: RolesTableProps) => {
       </div>
     );
   }
+
+  console.log(roles);
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -122,33 +124,38 @@ const RolesTable = ({ roles, onView, onEdit, onDelete }: RolesTableProps) => {
 
               <td className="px-6 py-4">
                 <div className="flex items-center justify-center gap-2">
+                  {/* View - Available for all roles */}
                   <button
                     type="button"
                     onClick={() => onView(role)}
-                    className="rounded-lg p-2 hover:bg-slate-100"
+                    className="rounded-lg p-2 transition hover:bg-slate-100"
                     title="View Details"
                   >
                     <Eye size={18} className="text-slate-600" />
                   </button>
 
-                  {!role.isSystem && (
-                    <>
-                      <button
-                        type="button"
-                        onClick={() => onEdit?.(role)}
-                        className="rounded-lg p-2 hover:bg-slate-100"
-                      >
-                        <MoreHorizontal size={18} className="text-slate-600" />
-                      </button>
+                  {/* Edit - Only if allowed */}
+                  {role.meta.canEdit && (
+                    <button
+                      type="button"
+                      onClick={() => onEdit?.(role)}
+                      className="rounded-lg p-2 transition hover:bg-slate-100"
+                      title="Edit Role"
+                    >
+                      <Pencil size={18} className="text-slate-600" />
+                    </button>
+                  )}
 
-                      <button
-                        type="button"
-                        onClick={() => onDelete?.(role)}
-                        className="rounded-lg p-2 hover:bg-red-50"
-                      >
-                        <Lock size={18} className="text-red-500" />
-                      </button>
-                    </>
+                  {/* Delete - Only if allowed */}
+                  {role.meta.canDelete && (
+                    <button
+                      type="button"
+                      onClick={() => onDelete?.(role)}
+                      className="rounded-lg p-2 transition hover:bg-red-50"
+                      title="Delete Role"
+                    >
+                      <Trash2 size={18} className="text-red-600" />
+                    </button>
                   )}
                 </div>
               </td>
