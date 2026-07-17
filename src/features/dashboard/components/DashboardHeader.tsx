@@ -5,6 +5,8 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 
 import { fetchProfile } from "../../profile/redux/profileSlice";
 import ProfileDropdown from "../../profile/components/ProfileDropdown";
+import { logout } from "../../../features/auth/redux/authSlice";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardHeaderProps {
   onMenuClick: () => void;
@@ -14,12 +16,20 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
   const dispatch = useAppDispatch();
 
   const { profile, loading } = useAppSelector((state) => state.profile);
+  const { user } = useAppSelector((state) => state.auth);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!profile) {
       dispatch(fetchProfile());
     }
   }, [dispatch, profile]);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    navigate("/login", { replace: true });
+  };
 
   return (
     <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-slate-200 bg-white px-8">
@@ -70,12 +80,7 @@ export default function DashboardHeader({ onMenuClick }: DashboardHeaderProps) {
           <div className="h-10 w-10 animate-pulse rounded-full bg-slate-200" />
         ) : (
           profile && (
-            <ProfileDropdown
-              profile={profile}
-              onLogout={() => {
-                // Dispatch logout here
-              }}
-            />
+            <ProfileDropdown profile={profile} onLogout={handleLogout} />
           )
         )}
       </div>

@@ -9,8 +9,10 @@ import {
   LogOut,
   ChevronRight,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import clsx from "clsx";
+import { useAppDispatch, useAppSelector } from "../../../app/hooks";
+import { logout } from "../../auth/redux/authSlice";
 
 const menuItems = [
   {
@@ -46,6 +48,17 @@ const menuItems = [
 ];
 
 export default function Sidebar() {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const { profile, loading, error } = useAppSelector((state) => state.profile);
+
+  const handleLogout = () => {
+    dispatch(logout());
+
+    navigate("/login", { replace: true });
+  };
+
   return (
     <aside className="fixed left-0 top-0 z-40 hidden h-screen w-64 border-r border-slate-200 bg-white lg:flex lg:flex-col">
       {/* Logo */}
@@ -111,23 +124,36 @@ export default function Sidebar() {
           <span>Settings</span>
         </button>
 
-        <button className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-red-500 transition hover:bg-red-50">
+        <button
+          onClick={handleLogout}
+          className="mt-2 flex w-full items-center gap-3 rounded-xl px-4 py-3 text-red-500 transition hover:bg-red-50"
+        >
           <LogOut size={20} />
           <span>Logout</span>
         </button>
 
         {/* User */}
-        <div className="mt-6 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3">
-          <img
-            src="https://i.pravatar.cc/150?img=12"
-            alt="User"
-            className="h-11 w-11 rounded-full"
-          />
 
-          <div>
-            <p className="font-semibold text-slate-800">Amarjit Patil</p>
+        <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-3">
+          <div className="flex items-center gap-3">
+            <img
+              src={
+                profile?.avatar ||
+                `https://ui-avatars.com/api/?name=${profile?.fullName}&background=4F46E5&color=fff`
+              }
+              alt={profile?.fullName}
+              className="h-11 w-11 rounded-full object-cover"
+            />
 
-            <p className="text-xs text-slate-500">Administrator</p>
+            <div className="min-w-0 flex-1">
+              <p className="truncate font-semibold text-slate-800">
+                {profile?.fullName}
+              </p>
+
+              <p className="truncate text-xs text-slate-500">
+                {profile?.email}
+              </p>
+            </div>
           </div>
         </div>
       </div>

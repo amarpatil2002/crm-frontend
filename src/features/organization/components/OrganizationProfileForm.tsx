@@ -11,11 +11,8 @@ import type {
 } from "../types/organization.type";
 
 import GeneralInformationSection from "./GeneralInformationSection";
-import AddressCard from "./AddressCard";
-import WorkspaceSettingsSection from "./WorkspaceSettingsSection";
 import OrganizationOverviewCard from "./OrganizationOverviewCard";
-import SubscriptionCard from "./SubscriptionCard";
-import LogoUploader from "./LogoUploader";
+
 import { updateOrganizationProfile } from "../redux/organizationSlice";
 
 interface OrganizationProfileFormProps {
@@ -29,11 +26,7 @@ const OrganizationProfileForm = ({
 
   const { updating } = useAppSelector((state) => state.organization);
 
-  const [generalEditing, setGeneralEditing] = useState(false);
-
-  const [addressEditing, setAddressEditing] = useState(false);
-
-  const [workspaceEditing, setWorkspaceEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
 
   const {
     register,
@@ -42,7 +35,6 @@ const OrganizationProfileForm = ({
     formState: { errors },
   } = useForm<OrganizationFormValues>({
     resolver: yupResolver(organizationSchema),
-
     defaultValues: organization,
   });
 
@@ -54,79 +46,40 @@ const OrganizationProfileForm = ({
     try {
       await dispatch(updateOrganizationProfile(data)).unwrap();
 
-      setGeneralEditing(false);
-      setAddressEditing(false);
-      setWorkspaceEditing(false);
+      setIsEditing(false);
     } catch (error) {
       console.error(error);
     }
   };
 
-  const cancelGeneralEdit = () => {
+  const cancelEdit = () => {
     reset(organization);
 
-    setGeneralEditing(false);
-  };
-
-  const cancelAddressEdit = () => {
-    reset(organization);
-
-    setAddressEditing(false);
-  };
-
-  const cancelWorkspaceEdit = () => {
-    reset(organization);
-
-    setWorkspaceEditing(false);
+    setIsEditing(false);
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      {" "}
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        {/* Left Side */}
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="grid grid-cols-1 gap-6 xl:grid-cols-3"
+    >
+      {/* Left */}
 
-        <div className="space-y-6 xl:col-span-2">
-          <GeneralInformationSection
-            register={register}
-            errors={errors}
-            isEditing={generalEditing}
-            saving={updating}
-            onEdit={() => setGeneralEditing(true)}
-            onCancel={cancelGeneralEdit}
-          />
+      <div className="xl:col-span-2">
+        <GeneralInformationSection
+          register={register}
+          errors={errors}
+          isEditing={isEditing}
+          saving={updating}
+          onEdit={() => setIsEditing(true)}
+          onCancel={cancelEdit}
+        />
+      </div>
 
-          <AddressCard
-            register={register}
-            errors={errors}
-            isEditing={addressEditing}
-            saving={updating}
-            onEdit={() => setAddressEditing(true)}
-            onCancel={cancelAddressEdit}
-          />
+      {/* Right */}
 
-          <WorkspaceSettingsSection
-            register={register}
-            errors={errors}
-            isEditing={workspaceEditing}
-            saving={updating}
-            onEdit={() => setWorkspaceEditing(true)}
-            onCancel={cancelWorkspaceEdit}
-          />
-        </div>
-
-        {/* Right Side */}
-
-        <div className="space-y-6">
-          <OrganizationOverviewCard organization={organization} />
-          <SubscriptionCard subscription={organization.subscription} />{" "}
-          <LogoUploader
-            logo={organization.logo}
-            disabled={
-              generalEditing || addressEditing || workspaceEditing || updating
-            }
-          />
-        </div>
+      <div>
+        <OrganizationOverviewCard organization={organization} />
       </div>
     </form>
   );
