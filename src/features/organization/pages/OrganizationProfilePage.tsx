@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 import { fetchOrganization } from "../redux/organizationSlice";
 import OrganizationProfileForm from "../components/OrganizationProfileForm";
-import WorkspaceSettingsSection from "../components/WorkspaceSettingsSection";
+import MemberPage from "../../members/page/MemberPage";
+import RolesPermissionsPage from "../../rolesandpermissions/page/RolesPermissionsPage";
 
 const tabs = [
   { id: "overview", label: "Overview" },
   { id: "members", label: "Members" },
   { id: "roles", label: "Roles & Permissions" },
   { id: "branding", label: "Branding" },
-  { id: "workspace", label: "Workspace" },
 ];
 
 const OrganizationProfilePage = () => {
@@ -20,19 +20,6 @@ const OrganizationProfilePage = () => {
   const { organization, loading, error } = useAppSelector(
     (state) => state.organization,
   );
-
-  const [isEditing, setIsEditing] = useState(false);
-
-  const {
-    register,
-    handleSubmit,
-    reset,
-    formState: { errors },
-  } = useForm({
-    resolver: yupResolver(workspaceSchema),
-
-    defaultValues: organization.settings,
-  });
 
   useEffect(() => {
     dispatch(fetchOrganization());
@@ -100,25 +87,19 @@ const OrganizationProfilePage = () => {
 
       {activeTab === "members" && (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-          Members Module (Coming Next)
+          <MemberPage />
         </div>
       )}
 
       {activeTab === "roles" && (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-          Roles & Permissions Module
+          <RolesPermissionsPage />
         </div>
       )}
 
       {activeTab === "branding" && (
         <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
           Branding Module
-        </div>
-      )}
-
-      {activeTab === "workspace" && (
-        <div className="rounded-2xl border border-slate-200 bg-white p-8 text-center">
-          <WorkspaceSettingsSection />
         </div>
       )}
     </section>
