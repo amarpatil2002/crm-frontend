@@ -29,8 +29,6 @@ const RolesTable = ({ roles, onView, onEdit, onDelete }: RolesTableProps) => {
     );
   }
 
-  console.log(roles);
-
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
       <table className="w-full">

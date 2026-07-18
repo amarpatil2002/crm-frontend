@@ -9,7 +9,7 @@ import {
   getPermissions,
 } from "../api/role.api";
 
-import type { Role, RoleFormValues } from "../types/role.type";
+import type { Role, RoleFormValues, Permissions } from "../types/role.type";
 
 interface UpdateRolePayload {
   roleId: string;
@@ -19,6 +19,8 @@ interface UpdateRolePayload {
 
 interface RoleState {
   roles: Role[];
+
+  permissions: Permissions[];
 
   selectedRole: Role | null;
 
@@ -35,6 +37,7 @@ interface RoleState {
 
 const initialState: RoleState = {
   roles: [],
+  permissions: [],
   selectedRole: null,
   loading: false,
   creating: false,
@@ -268,6 +271,26 @@ const roleSlice = createSlice({
         state.deleting = false;
 
         state.error = (action.payload as string) ?? "Failed to delete role.";
+      })
+
+      // get all permissions
+      .addCase(fetchPermissions.pending, (state) => {
+        state.loading = true;
+
+        state.error = null;
+      })
+
+      .addCase(fetchPermissions.fulfilled, (state, action) => {
+        state.loading = false;
+
+        state.permissions = action.payload;
+      })
+
+      .addCase(fetchPermissions.rejected, (state, action) => {
+        state.loading = false;
+
+        state.error =
+          (action.payload as string) ?? "Failed to fetch permissions.";
       });
   },
 });

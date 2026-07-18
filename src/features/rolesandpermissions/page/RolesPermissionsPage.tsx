@@ -9,15 +9,15 @@ import type { Role } from "../types/role.type";
 
 import RolesTable from "../components/RolesTable";
 import RoleDetailsSection from "../components/RoleDetailsSection";
+import CreateRoleModal from "../components/CreateRoleModal";
 
 const RolesPermissionsPage = () => {
   const dispatch = useAppDispatch();
 
   const { roles, loading, error } = useAppSelector((state) => state.roles);
-
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
-
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [openCreateRole, setOpenCreateRole] = useState(false);
 
   useEffect(() => {
     dispatch(fetchRoles());
@@ -29,9 +29,7 @@ const RolesPermissionsPage = () => {
   const handleViewRole = async (role: Role) => {
     try {
       const response = await dispatch(fetchRole(role._id)).unwrap();
-
       setSelectedRole(response);
-
       setDrawerOpen(true);
     } catch (error) {
       console.error(error);
@@ -44,7 +42,7 @@ const RolesPermissionsPage = () => {
   const handleCreateRole = () => {
     console.log("Create Role");
 
-    // Open Create Role Modal
+    setOpenCreateRole(true);
   };
 
   /**
@@ -112,14 +110,6 @@ const RolesPermissionsPage = () => {
           </div>
         )}
 
-        {/* Error */}
-
-        {!loading && error && (
-          <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-600">
-            {error}
-          </div>
-        )}
-
         {/* Empty */}
 
         {!loading && !error && roles.length === 0 && (
@@ -136,7 +126,7 @@ const RolesPermissionsPage = () => {
 
         {/* Table */}
 
-        {!loading && !error && roles.length > 0 && (
+        {!loading && roles.length > 0 && (
           <RolesTable
             roles={roles}
             onView={handleViewRole}
@@ -152,6 +142,11 @@ const RolesPermissionsPage = () => {
         open={drawerOpen}
         role={selectedRole}
         onClose={handleCloseDrawer}
+      />
+
+      <CreateRoleModal
+        open={openCreateRole}
+        onClose={() => setOpenCreateRole(false)}
       />
     </>
   );

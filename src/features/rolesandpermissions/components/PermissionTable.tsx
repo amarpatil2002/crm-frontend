@@ -1,8 +1,8 @@
-import type { AccessScope, Permission } from "../types/role.type";
+import type { AccessScope, Permissions } from "../types/role.type";
 
 interface PermissionGroup {
   module: string;
-  permissions: Permission[];
+  permissions: Permissions[];
 }
 
 interface PermissionTableProps {
@@ -15,9 +15,10 @@ interface PermissionTableProps {
   onPermissionChange: (permission: string) => void;
 
   onScopeChange: (module: string, scope: AccessScope) => void;
+  onSelectAll: (module: string, checked: boolean) => void;
 }
 
-const scopes: AccessScope[] = ["SELF", "TEAM", "ORGANIZATION", "ALL"];
+const scopes: AccessScope[] = ["OWN", "TEAM", "ALL"];
 
 const PermissionTable = ({
   permissions,
@@ -25,29 +26,32 @@ const PermissionTable = ({
   accessScope,
   onPermissionChange,
   onScopeChange,
+  onSelectAll,
 }: PermissionTableProps) => {
   return (
     <div className="space-y-5">
       {permissions.map((group) => {
-        const allSelected = group.permissions.every((permission) =>
-          selectedPermissions.includes(permission.key),
-        );
+        const allSelected =
+          group.permissions.length > 0 &&
+          group.permissions.every((permission) =>
+            selectedPermissions.includes(permission.key),
+          );
 
         return (
           <div
             key={group.module}
-            className="overflow-hidden rounded-xl border border-slate-200 bg-white"
+            className="rounded-2xl border border-slate-200 bg-white"
           >
             {/* Header */}
 
-            <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-5 py-3">
+            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-2">
               <div>
-                <h3 className="text-sm font-semibold capitalize text-slate-900">
+                <h3 className="text-base font-semibold capitalize text-slate-900">
                   {group.module}
                 </h3>
 
-                <p className="text-xs text-slate-500">
-                  {group.permissions.length} Permissions
+                <p className="mt-1 text-xs text-slate-500">
+                  {group.permissions.length} permissions
                 </p>
               </div>
 
@@ -56,17 +60,9 @@ const PermissionTable = ({
                   <input
                     type="checkbox"
                     checked={allSelected}
-                    onChange={() => {
-                      group.permissions.forEach((permission) => {
-                        const checked = selectedPermissions.includes(
-                          permission.key,
-                        );
-
-                        if (!checked) {
-                          onPermissionChange(permission.key);
-                        }
-                      });
-                    }}
+                    onChange={(e) =>
+                      onSelectAll(group.module, e.target.checked)
+                    }
                   />
                   Select All
                 </label>
@@ -76,65 +72,47 @@ const PermissionTable = ({
                   onChange={(e) =>
                     onScopeChange(group.module, e.target.value as AccessScope)
                   }
-                  className="rounded-lg border border-slate-300 px-3 py-2 text-sm"
+                  className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm"
                 >
                   {scopes.map((scope) => (
-                    <option key={scope} value={scope}>
-                      {scope}
-                    </option>
+                    <option key={scope}>{scope}</option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* Permission Table */}
+            {/* Permission Grid */}
 
-            <table className="w-full">
-              <thead className="bg-white">
-                <tr className="border-b border-slate-200">
-                  <th className="w-14 px-4 py-3"></th>
+            <div className="grid gap-2 p-2 md:grid-cols-2 lg:grid-cols-3">
+              {group.permissions.map((permission) => {
+                const checked = selectedPermissions.includes(permission.key);
 
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
-                    Permission
-                  </th>
-
-                  <th className="px-4 py-3 text-left text-xs font-semibold uppercase text-slate-500">
-                    Description
-                  </th>
-                </tr>
-              </thead>
-
-              <tbody>
-                {group.permissions.map((permission) => (
-                  <tr
+                return (
+                  <label
                     key={permission.key}
-                    className="border-b border-slate-100 last:border-0 hover:bg-slate-50"
+                    className={`flex cursor-pointer items-start gap-2 rounded-xl  p-2 transition `}
                   >
-                    <td className="px-4 py-3">
-                      <input
-                        type="checkbox"
-                        checked={selectedPermissions.includes(permission.key)}
-                        onChange={() => onPermissionChange(permission.key)}
-                      />
-                    </td>
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      onChange={() => onPermissionChange(permission.key)}
+                      className="mt-1"
+                    />
 
-                    <td className="px-4 py-3">
-                      <div className="font-medium text-slate-900">
+                    <div>
+                      <p className="text-sm font-medium text-slate-900">
                         {permission.name}
-                      </div>
+                      </p>
 
-                      <div className="text-xs text-slate-500">
-                        {permission.key}
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3 text-sm text-slate-600">
-                      {permission.description || "-"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {permission.key.toUpperCase().split(":")[1]}{" "}
+                        {permission.key.toUpperCase().split(":")[0]}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
           </div>
         );
       })}

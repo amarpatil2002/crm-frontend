@@ -2,6 +2,8 @@ import * as yup from "yup";
 
 import type { RoleFormValues } from "../types/role.type";
 
+const ACCESS_SCOPES = ["OWN", "TEAM", "ALL"] as const;
+
 export const roleSchema: yup.ObjectSchema<RoleFormValues> = yup.object({
   name: yup
     .string()
@@ -31,7 +33,15 @@ export const roleSchema: yup.ObjectSchema<RoleFormValues> = yup.object({
     .min(1, "Select at least one permission.")
     .required(),
 
-  accessScope: yup.object().required(),
+  accessScope: yup
+    .object()
+    .test("valid-access-scope", "Invalid access scope", (value) => {
+      if (!value) return false;
+
+      return Object.values(value).every((scope) =>
+        ACCESS_SCOPES.includes(scope as (typeof ACCESS_SCOPES)[number]),
+      );
+    }),
 
   priority: yup.number().required().min(1).max(100),
 });

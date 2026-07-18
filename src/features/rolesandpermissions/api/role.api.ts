@@ -2,16 +2,15 @@ import api from "../../../api/axios";
 
 import type { ApiResponse } from "../../../types/api-response.type";
 import type {
-  Permission,
+  Permissions,
   Role,
   RoleFormValues,
   RolesResponse,
 } from "../types/role.type";
 
-export const getPermissions = async (): Promise<Permission[]> => {
-  const response = await api.get<ApiResponse<Permission[]>>("/crm/permissions");
-
-  return response.data.data;
+export const getPermissions = async (): Promise<Permissions[]> => {
+  const response = await api.get("/crm/role/permission");
+  return response.data.data.items;
 };
 
 /**

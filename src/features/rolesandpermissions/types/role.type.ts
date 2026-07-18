@@ -1,6 +1,6 @@
-export type AccessScope = "SELF" | "TEAM" | "ORGANIZATION" | "ALL";
+export type AccessScope = "OWN" | "TEAM" | "ALL";
 
-export interface Permission {
+export interface Permissions {
   _id: string;
 
   name: string;
