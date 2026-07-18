@@ -143,23 +143,20 @@ const CreateRoleModal = ({ open, role, onClose }: CreateRoleModalProps) => {
         toast.success("Role updated successfully");
       } else {
         await dispatch(createRole(data)).unwrap();
-
         toast.success("Role created successfully");
       }
-
       dispatch(fetchRoles());
-
       reset();
-
-      onClose();
-      toast.success("Role created successfully");
-      dispatch(fetchRoles());
-
-      reset();
-
       onClose();
     } catch (error) {
-      if (error instanceof Error) toast.error(error.message);
+      const message =
+        typeof error === "string"
+          ? error
+          : error instanceof Error
+            ? error.message
+            : "Something went wrong.";
+
+      toast.error(message);
     }
   };
 

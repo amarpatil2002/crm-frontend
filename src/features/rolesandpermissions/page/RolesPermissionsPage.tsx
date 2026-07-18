@@ -3,13 +3,14 @@ import { Plus } from "lucide-react";
 
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 
-import { fetchRole, fetchRoles } from "../redux/roleSlice";
+import { fetchRole, fetchRoles, deleteRole } from "../redux/roleSlice";
 
 import type { Role } from "../types/role.type";
 
 import RolesTable from "../components/RolesTable";
 import RoleDetailsSection from "../components/RoleDetailsSection";
 import CreateRoleModal from "../components/CreateRoleModal";
+import { toast } from "sonner";
 
 const RolesPermissionsPage = () => {
   const dispatch = useAppDispatch();
@@ -60,10 +61,21 @@ const RolesPermissionsPage = () => {
   /**
    * Delete Role
    */
-  const handleDeleteRole = (role: Role) => {
-    console.log("Delete Role", role);
+  const handleDeleteRole = async (role: Role) => {
+    try {
+      await dispatch(deleteRole(role._id)).unwrap();
 
-    // Open Delete Confirmation
+      toast.success("Role deleted successfully");
+    } catch (error) {
+      const message =
+        typeof error === "string"
+          ? error
+          : error instanceof Error
+            ? error.message
+            : "Failed to delete role";
+
+      toast.error(message);
+    }
   };
 
   /**

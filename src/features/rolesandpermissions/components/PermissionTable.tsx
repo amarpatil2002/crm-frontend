@@ -68,14 +68,20 @@ const PermissionTable = ({
                 </label>
 
                 <select
-                  value={accessScope[group.module] ?? "SELF"}
+                  value={accessScope[group.module] ?? ""}
                   onChange={(e) =>
                     onScopeChange(group.module, e.target.value as AccessScope)
                   }
                   className="rounded-lg border border-slate-300 bg-white px-2 py-2 text-sm"
                 >
+                  <option value="" disabled>
+                    Select Scope
+                  </option>
+
                   {scopes.map((scope) => (
-                    <option key={scope}>{scope}</option>
+                    <option key={scope} value={scope}>
+                      {scope}
+                    </option>
                   ))}
                 </select>
               </div>
