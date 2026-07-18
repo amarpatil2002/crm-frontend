@@ -18,6 +18,7 @@ const RolesPermissionsPage = () => {
   const [selectedRole, setSelectedRole] = useState<Role | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [openCreateRole, setOpenCreateRole] = useState(false);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
 
   useEffect(() => {
     dispatch(fetchRoles());
@@ -40,18 +41,20 @@ const RolesPermissionsPage = () => {
    * Create Role
    */
   const handleCreateRole = () => {
-    console.log("Create Role");
-
     setOpenCreateRole(true);
   };
 
   /**
    * Edit Role
    */
-  const handleEditRole = (role: Role) => {
-    console.log("Edit Role", role);
-
-    // Open Edit Modal
+  const handleEditRole = async (role: Role) => {
+    try {
+      const response = await dispatch(fetchRole(role._id)).unwrap();
+      setEditingRole(response);
+      setOpenCreateRole(true);
+    } catch (error) {
+      console.error(error);
+    }
   };
 
   /**
@@ -146,7 +149,11 @@ const RolesPermissionsPage = () => {
 
       <CreateRoleModal
         open={openCreateRole}
-        onClose={() => setOpenCreateRole(false)}
+        role={editingRole}
+        onClose={() => {
+          setOpenCreateRole(false);
+          setEditingRole(null);
+        }}
       />
     </>
   );

@@ -5,13 +5,19 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 
-import { createRole, fetchPermissions, fetchRoles } from "../redux/roleSlice";
+import {
+  createRole,
+  fetchPermissions,
+  fetchRoles,
+  updateRole,
+} from "../redux/roleSlice";
 import { roleSchema } from "../schema/role.schema";
 
 import type {
   RoleFormValues,
   AccessScope,
   Permissions,
+  Role,
 } from "../types/role.type";
 
 import PermissionTable from "./PermissionTable";
@@ -19,13 +25,14 @@ import { toast } from "sonner";
 
 interface CreateRoleModalProps {
   open: boolean;
+  role?: Role | null;
   onClose: () => void;
 }
 
 const inputClass =
   "w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none transition focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
 
-const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
+const CreateRoleModal = ({ open, role, onClose }: CreateRoleModalProps) => {
   const dispatch = useAppDispatch();
 
   const { creating, permissions } = useAppSelector((state) => state.roles);
@@ -99,6 +106,19 @@ const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
     setValue("code", code);
   }, [watch("name"), setValue]);
 
+  useEffect(() => {
+    if (!role) return;
+
+    reset({
+      name: role.name,
+      code: role.code,
+      description: role.description,
+      priority: role.priority,
+      permissionKeys: role.permissionKeys ?? [],
+      accessScope: role.accessScope ?? {},
+    });
+  }, [role, reset]);
+
   const onSubmit = async (data: RoleFormValues) => {
     try {
       const modules = [
@@ -112,8 +132,26 @@ const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
           throw new Error(`Please select access scope for ${module}.`);
         }
       }
+      if (role) {
+        await dispatch(
+          updateRole({
+            roleId: role._id,
+            data,
+          }),
+        ).unwrap();
 
-      await dispatch(createRole(data)).unwrap();
+        toast.success("Role updated successfully");
+      } else {
+        await dispatch(createRole(data)).unwrap();
+
+        toast.success("Role created successfully");
+      }
+
+      dispatch(fetchRoles());
+
+      reset();
+
+      onClose();
       toast.success("Role created successfully");
       dispatch(fetchRoles());
 
@@ -121,30 +159,22 @@ const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
 
       onClose();
     } catch (error) {
-      toast.error(error as string);
+      if (error instanceof Error) toast.error(error.message);
     }
   };
 
   const handlePermissionChange = (permissionKey: string) => {
-    const selected = watch("permissionKeys");
+    const selected = watch("permissionKeys") ?? [];
 
-    if (selected.includes(permissionKey)) {
-      setValue(
-        "permissionKeys",
-        selected.filter((key) => key !== permissionKey),
-        {
-          shouldValidate: true,
-          shouldDirty: true,
-          shouldTouch: true,
-        },
-      );
-    } else {
-      setValue("permissionKeys", [...selected, permissionKey], {
-        shouldValidate: true,
-        shouldDirty: true,
-        shouldTouch: true,
-      });
-    }
+    const updated = selected.includes(permissionKey)
+      ? selected.filter((key) => key !== permissionKey)
+      : [...selected, permissionKey];
+
+    setValue("permissionKeys", updated, {
+      shouldValidate: true,
+      shouldDirty: true,
+      shouldTouch: true,
+    });
   };
 
   const handleSelectAll = (module: string, checked: boolean) => {
@@ -152,7 +182,7 @@ const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
       .filter((permission) => permission.module === module)
       .map((permission) => permission.key);
 
-    const selected = watch("permissionKeys");
+    const selected = watch("permissionKeys") ?? [];
 
     if (checked) {
       setValue(
@@ -200,11 +230,13 @@ const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
           <div className="flex items-center justify-between border-b border-slate-200 px-6 py-5">
             <div>
               <h2 className="text-xl font-semibold text-slate-900">
-                Create Role
+                {role ? "Edit Role" : "Create Role"}
               </h2>
 
               <p className="mt-1 text-sm text-slate-500">
-                Create a custom role and assign permissions.
+                {role
+                  ? "Update role details and permissions."
+                  : "Create a custom role and assign permissions."}
               </p>
             </div>
 
@@ -309,8 +341,8 @@ const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
               )}
               <PermissionTable
                 permissions={groupedPermissions}
-                selectedPermissions={watch("permissionKeys")}
-                accessScope={watch("accessScope")}
+                selectedPermissions={watch("permissionKeys") ?? []}
+                accessScope={watch("accessScope") ?? {}}
                 onPermissionChange={handlePermissionChange}
                 onSelectAll={handleSelectAll}
                 onScopeChange={handleScopeChange}
@@ -335,9 +367,15 @@ const CreateRoleModal = ({ open, onClose }: CreateRoleModalProps) => {
             <button
               type="submit"
               disabled={creating}
-              className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-50"
+              className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white"
             >
-              {creating ? "Creating..." : "Create Role"}
+              {creating
+                ? role
+                  ? "Updating..."
+                  : "Creating..."
+                : role
+                  ? "Update Role"
+                  : "Create Role"}
             </button>
           </div>
         </form>
