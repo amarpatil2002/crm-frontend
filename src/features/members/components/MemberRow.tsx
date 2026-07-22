@@ -1,6 +1,7 @@
 import { Edit, RefreshCcw, Shield, Trash2, UserX } from "lucide-react";
 
 import type { OrganizationMember } from "../types/member.type";
+import MemberActions from "./MemberActions";
 
 interface MemberRowProps {
   member: OrganizationMember;
@@ -93,6 +94,16 @@ export default function MemberRow({
             onClick={() => onDelete?.(member)}
           />
         </div>
+      </td>
+      <td className="px-6 py-4">
+        <MemberActions
+          member={member}
+          onEdit={onEdit}
+          onChangeRole={onChangeRole}
+          onResendInvite={onResendInvite}
+          onSuspend={onSuspend}
+          onDelete={onDelete}
+        />
       </td>
     </tr>
   );

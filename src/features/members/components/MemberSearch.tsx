@@ -27,7 +27,7 @@ export default function MemberSearch({
   onInvite,
 }: MemberSearchProps) {
   return (
-    <div className="rounded-xl border bg-white p-4 shadow-sm">
+    <div className="rounded-sm  bg-white p-4 shadow-sm">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
         {/* Search & Filters */}
         <div className="flex flex-1 flex-col gap-3 md:flex-row">
