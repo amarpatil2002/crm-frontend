@@ -3,6 +3,7 @@ import authReducer from "../features/auth/redux/authSlice";
 import organizationReducer from "../features/organization/redux/organizationSlice";
 import profileReducer from "../features/profile/redux/profileSlice";
 import rolesReducer from "../features/rolesandpermissions/redux/roleSlice";
+import memberReducer from "../features/members/redux/memberSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     organization: organizationReducer,
     profile: profileReducer,
     roles: rolesReducer,
+    member: memberReducer,
   },
   devTools: import.meta.env.DEV,
 });

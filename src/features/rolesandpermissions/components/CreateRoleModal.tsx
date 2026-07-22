@@ -142,6 +142,7 @@ const CreateRoleModal = ({ open, role, onClose }: CreateRoleModalProps) => {
 
         toast.success("Role updated successfully");
       } else {
+        console.log("object");
         await dispatch(createRole(data)).unwrap();
         toast.success("Role created successfully");
       }
