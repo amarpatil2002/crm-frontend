@@ -63,7 +63,7 @@ export default function MemberSearch({
           </select>
 
           {/* Status */}
-          <select
+          {/* <select
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
             className="h-11 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-indigo-500"
@@ -77,7 +77,7 @@ export default function MemberSearch({
             <option value="INACTIVE">Inactive</option>
 
             <option value="SUSPENDED">Suspended</option>
-          </select>
+          </select> */}
         </div>
 
         {/* Invite Button */}

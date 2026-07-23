@@ -5,6 +5,8 @@ import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 
 import { fetchMembers, inviteOrganizationMember } from "../redux/memberSlice";
 
+import type { OrganizationMember } from "../types/member.type";
+
 import MemberSearch from "../components/MemberSearch";
 import MemberTable from "../components/MemberTable";
 import InviteMemberModal from "../components/InviteMemberModal";
@@ -20,6 +22,12 @@ export default function MembersPage() {
 
   const { roles = [] } = useAppSelector((state) => state.roles);
 
+  const [inviteOpen, setInviteOpen] = useState(false);
+
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
+  const [role, setRole] = useState("");
+
   const [selectedMember, setSelectedMember] =
     useState<OrganizationMember | null>(null);
 
@@ -27,34 +35,30 @@ export default function MembersPage() {
   const [changeRoleOpen, setChangeRoleOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const [openInviteModal, setOpenInviteModal] = useState(false);
-
-  const [search, setSearch] = useState("");
-  const [status, setStatus] = useState("");
-  const [role, setRole] = useState("");
-
   useEffect(() => {
     dispatch(fetchMembers());
   }, [dispatch]);
 
   const filteredMembers = useMemo(() => {
     return members.filter((member) => {
+      const keyword = search.toLowerCase();
+
       const fullName = `${member.firstName} ${member.lastName}`.toLowerCase();
 
-      const searchValue = search.toLowerCase();
+      const matchSearch =
+        !keyword ||
+        fullName.includes(keyword) ||
+        member.email.toLowerCase().includes(keyword);
 
-      const matchesSearch =
-        !search ||
-        fullName.includes(searchValue) ||
-        member.email.toLowerCase().includes(searchValue);
+      const matchStatus = !status || member.status === status;
 
-      const matchesRole = !role || member.role?._id === role;
+      const matchRole = !role || member.role?._id === role;
 
-      const matchesStatus = !status || member.status === status;
-
-      return matchesSearch && matchesRole && matchesStatus;
+      return matchSearch && matchStatus && matchRole;
     });
-  }, [members, search, role, status]);
+  }, [members, search, status, role]);
+
+  const totalMembers = members.length;
 
   const activeMembers = members.filter(
     (member) => member.status === "ACTIVE",
@@ -68,8 +72,48 @@ export default function MembersPage() {
     (member) => member.status === "SUSPENDED",
   ).length;
 
+  const handleInvite = async (data: any) => {
+    const result = await dispatch(inviteOrganizationMember(data));
+
+    if (inviteOrganizationMember.fulfilled.match(result)) {
+      setInviteOpen(false);
+
+      dispatch(fetchMembers());
+    }
+  };
+
+  const handleEdit = (member: OrganizationMember) => {
+    setSelectedMember(member);
+    setEditOpen(true);
+  };
+
+  const handleChangeRole = (member: OrganizationMember) => {
+    setSelectedMember(member);
+    setChangeRoleOpen(true);
+  };
+
+  const handleResendInvite = async (member: OrganizationMember) => {
+    console.log(member);
+
+    // dispatch(resendMemberInvite(member._id));
+  };
+
+  const handleSuspend = async (member: OrganizationMember) => {
+    console.log(member);
+
+    // dispatch(changeMemberStatus({
+    //   memberId: member._id,
+    //   status: "SUSPENDED",
+    // }));
+  };
+
+  const handleDelete = (member: OrganizationMember) => {
+    setSelectedMember(member);
+    setDeleteOpen(true);
+  };
+
   return (
-    <div className="space-y-6 p-6">
+    <div className="mx-auto max-w-7xl space-y-6 p-6">
       {/* Header */}
 
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -79,17 +123,17 @@ export default function MembersPage() {
           </div>
 
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Team Members</h1>
+            <h1 className="text-2xl font-bold">Team Members</h1>
 
             <p className="text-sm text-gray-500">
-              Manage your organization members and invitations.
+              Manage organization members.
             </p>
           </div>
         </div>
 
         <button
-          onClick={() => setOpenInviteModal(true)}
-          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-indigo-700"
+          onClick={() => setInviteOpen(true)}
+          className="inline-flex items-center gap-2 rounded-lg bg-indigo-600 px-5 py-2.5 text-white hover:bg-indigo-700"
         >
           <Plus size={18} />
           Invite Member
@@ -98,8 +142,8 @@ export default function MembersPage() {
 
       {/* Stats */}
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <StatCard title="Total Members" value={members.length} />
+      <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+        <StatCard title="Total Members" value={totalMembers} />
 
         <StatCard title="Active" value={activeMembers} />
 
@@ -118,55 +162,29 @@ export default function MembersPage() {
         onSearchChange={setSearch}
         onStatusChange={setStatus}
         onRoleChange={setRole}
-        onInvite={() => setOpenInviteModal(true)}
+        onInvite={() => setInviteOpen(true)}
       />
 
-      {/* Table */}
+      {/* Members */}
 
       <MemberTable
         members={filteredMembers}
         loading={loading}
-        onEdit={(member) => {
-          setSelectedMember(member);
-          setEditOpen(true);
-        }}
-        onChangeRole={(member) => {
-          setSelectedMember(member);
-          setChangeRoleOpen(true);
-        }}
-        onResendInvite={(member) => {
-          dispatch(resendMemberInvite(member._id));
-        }}
-        onSuspend={(member) => {
-          dispatch(
-            changeMemberStatus({
-              memberId: member._id,
-              status: "SUSPENDED",
-            }),
-          );
-        }}
-        onDelete={(member) => {
-          setSelectedMember(member);
-          setDeleteOpen(true);
-        }}
+        onEdit={handleEdit}
+        onChangeRole={handleChangeRole}
+        onResendInvite={handleResendInvite}
+        onSuspend={handleSuspend}
+        onDelete={handleDelete}
       />
 
-      {/* Invite Modal */}
+      {/* Invite */}
 
       <InviteMemberModal
-        open={openInviteModal}
+        open={inviteOpen}
         loading={submitting}
         roles={roles}
-        onClose={() => setOpenInviteModal(false)}
-        onSubmit={async (data) => {
-          const result = await dispatch(inviteOrganizationMember(data));
-
-          if (inviteOrganizationMember.fulfilled.match(result)) {
-            setOpenInviteModal(false);
-
-            dispatch(fetchMembers());
-          }
-        }}
+        onClose={() => setInviteOpen(false)}
+        onSubmit={handleInvite}
       />
     </div>
   );
@@ -182,7 +200,7 @@ function StatCard({ title, value }: StatCardProps) {
     <div className="rounded-xl border bg-white p-5 shadow-sm">
       <p className="text-sm text-gray-500">{title}</p>
 
-      <h2 className="mt-2 text-3xl font-bold text-gray-900">{value}</h2>
+      <h2 className="mt-2 text-3xl font-bold">{value}</h2>
     </div>
   );
 }
