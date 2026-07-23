@@ -15,24 +15,18 @@ import {
 import type {
   InviteMemberFormValues,
   OrganizationMember,
+  PaginationMeta,
 } from "../types/member.type";
-
-interface Pagination {
-  page: number;
-  limit: number;
-  total: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
 
 interface MemberState {
   members: OrganizationMember[];
+
   selectedMember: OrganizationMember | null;
 
-  pagination: Pagination | null;
+  pagination: PaginationMeta | null;
 
   loading: boolean;
+
   submitting: boolean;
 
   error: string | null;
@@ -40,46 +34,61 @@ interface MemberState {
 
 const initialState: MemberState = {
   members: [],
+
   selectedMember: null,
 
   pagination: null,
 
   loading: false,
+
   submitting: false,
 
   error: null,
 };
 
 /* -------------------------------------------------------------------------- */
-/*                                   THUNKS                                   */
+/*                               FETCH MEMBERS                                */
 /* -------------------------------------------------------------------------- */
 
 export const fetchMembers = createAsyncThunk(
   "member/fetchMembers",
   async (query?: MemberQuery) => {
-    const response = await getMembers(query);
-    return response.data;
+    return await getMembers(query);
   },
 );
+
+/* -------------------------------------------------------------------------- */
+/*                              FETCH MEMBER BY ID                            */
+/* -------------------------------------------------------------------------- */
 
 export const fetchMemberById = createAsyncThunk(
   "member/fetchMemberById",
   async (memberId: string) => {
     const response = await getMemberById(memberId);
+
     return response.data;
   },
 );
+
+/* -------------------------------------------------------------------------- */
+/*                               INVITE MEMBER                                */
+/* -------------------------------------------------------------------------- */
 
 export const inviteOrganizationMember = createAsyncThunk(
-  "member/invite",
+  "member/inviteOrganizationMember",
   async (payload: InviteMemberFormValues) => {
     const response = await inviteMember(payload);
+
     return response.data;
   },
 );
 
+/* -------------------------------------------------------------------------- */
+/*                               UPDATE MEMBER                                */
+/* -------------------------------------------------------------------------- */
+
 export const updateOrganizationMember = createAsyncThunk(
-  "member/update",
+  "member/updateOrganizationMember",
   async ({
     memberId,
     payload,
@@ -88,12 +97,17 @@ export const updateOrganizationMember = createAsyncThunk(
     payload: Partial<InviteMemberFormValues>;
   }) => {
     const response = await updateMember(memberId, payload);
+
     return response.data;
   },
 );
 
+/* -------------------------------------------------------------------------- */
+/*                               CHANGE ROLE                                  */
+/* -------------------------------------------------------------------------- */
+
 export const changeMemberRole = createAsyncThunk(
-  "member/changeRole",
+  "member/changeMemberRole",
   async ({ memberId, role }: { memberId: string; role: string }) => {
     const response = await updateMemberRole(memberId, role);
 
@@ -105,8 +119,12 @@ export const changeMemberRole = createAsyncThunk(
   },
 );
 
+/* -------------------------------------------------------------------------- */
+/*                              CHANGE STATUS                                 */
+/* -------------------------------------------------------------------------- */
+
 export const changeMemberStatus = createAsyncThunk(
-  "member/changeStatus",
+  "member/changeMemberStatus",
   async ({
     memberId,
     status,
@@ -124,8 +142,12 @@ export const changeMemberStatus = createAsyncThunk(
   },
 );
 
+/* -------------------------------------------------------------------------- */
+/*                               DELETE MEMBER                                */
+/* -------------------------------------------------------------------------- */
+
 export const removeMember = createAsyncThunk(
-  "member/delete",
+  "member/removeMember",
   async (memberId: string) => {
     await deleteMember(memberId);
 
@@ -133,17 +155,19 @@ export const removeMember = createAsyncThunk(
   },
 );
 
+/* -------------------------------------------------------------------------- */
+/*                              RESEND INVITE                                 */
+/* -------------------------------------------------------------------------- */
+
 export const resendMemberInvite = createAsyncThunk(
-  "member/resendInvite",
+  "member/resendMemberInvite",
   async (memberId: string) => {
     await resendInvitation(memberId);
 
     return memberId;
   },
-);
-
-/* -------------------------------------------------------------------------- */
-/*                                   SLICE                                    */
+); /* -------------------------------------------------------------------------- */
+/*                                    SLICE                                   */
 /* -------------------------------------------------------------------------- */
 
 const memberSlice = createSlice({
@@ -161,66 +185,125 @@ const memberSlice = createSlice({
     },
   },
 
-  extraReducers(builder) {
-    /* ---------------- Fetch Members ---------------- */
+  extraReducers: (builder) => {
+    /* ---------------------------------------------------------------------- */
+    /*                               FETCH MEMBERS                            */
+    /* ---------------------------------------------------------------------- */
 
-    builder.addCase(fetchMembers.pending, (state) => {
-      state.loading = true;
-      state.error = null;
-    });
+    builder
+      .addCase(fetchMembers.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
 
-    builder.addCase(fetchMembers.fulfilled, (state, action) => {
-      state.loading = false;
+      .addCase(fetchMembers.fulfilled, (state, action) => {
+        state.loading = false;
 
-      state.members = action.payload.items;
-      state.pagination = action.payload.pagination;
-    });
+        state.members = action.payload.data;
 
-    builder.addCase(fetchMembers.rejected, (state, action) => {
-      state.loading = false;
+        state.pagination = action.payload.meta;
+      })
 
-      state.error = action.error.message || "Failed to fetch members";
-    });
+      .addCase(fetchMembers.rejected, (state, action) => {
+        state.loading = false;
 
-    /* ---------------- Fetch By Id ---------------- */
+        state.error = action.error.message ?? "Failed to fetch members";
+      });
 
-    builder.addCase(fetchMemberById.fulfilled, (state, action) => {
-      state.selectedMember = action.payload;
-    });
+    /* ---------------------------------------------------------------------- */
+    /*                            FETCH MEMBER BY ID                          */
+    /* ---------------------------------------------------------------------- */
 
-    /* ---------------- Invite ---------------- */
+    builder
+      .addCase(fetchMemberById.pending, (state) => {
+        state.loading = true;
+      })
 
-    builder.addCase(inviteOrganizationMember.pending, (state) => {
-      state.submitting = true;
-    });
+      .addCase(fetchMemberById.fulfilled, (state, action) => {
+        state.loading = false;
 
-    builder.addCase(inviteOrganizationMember.fulfilled, (state, action) => {
-      state.submitting = false;
+        state.selectedMember = action.payload;
+      })
 
-      state.members.unshift(action.payload);
-    });
+      .addCase(fetchMemberById.rejected, (state, action) => {
+        state.loading = false;
 
-    builder.addCase(inviteOrganizationMember.rejected, (state, action) => {
-      state.submitting = false;
+        state.error = action.error.message ?? "Failed to fetch member";
+      });
 
-      state.error = action.error.message || "Invite failed";
-    });
+    /* ---------------------------------------------------------------------- */
+    /*                               INVITE MEMBER                            */
+    /* ---------------------------------------------------------------------- */
 
-    /* ---------------- Update ---------------- */
+    builder
+      .addCase(inviteOrganizationMember.pending, (state) => {
+        state.submitting = true;
 
-    builder.addCase(updateOrganizationMember.fulfilled, (state, action) => {
-      const index = state.members.findIndex(
-        (member) => member._id === action.payload._id,
+        state.error = null;
+      })
+
+      .addCase(inviteOrganizationMember.fulfilled, (state) => {
+        state.submitting = false;
+
+        // MembersPage calls fetchMembers()
+        // so we don't manually insert here.
+      })
+
+      .addCase(inviteOrganizationMember.rejected, (state, action) => {
+        state.submitting = false;
+
+        state.error = action.error.message ?? "Failed to invite member";
+      });
+
+    /* ---------------------------------------------------------------------- */
+    /*                               UPDATE MEMBER                            */
+    /* ---------------------------------------------------------------------- */
+
+    builder
+      .addCase(updateOrganizationMember.pending, (state) => {
+        state.submitting = true;
+      })
+
+      .addCase(updateOrganizationMember.fulfilled, (state, action) => {
+        state.submitting = false;
+
+        const index = state.members.findIndex(
+          (member) => member._id === action.payload._id,
+        );
+
+        if (index !== -1) {
+          state.members[index] = action.payload;
+        }
+
+        state.selectedMember = action.payload;
+      })
+
+      .addCase(updateOrganizationMember.rejected, (state, action) => {
+        state.submitting = false;
+
+        state.error = action.error.message ?? "Failed to update member";
+      });
+
+    /* ---------------------------------------------------------------------- */
+    /*                               CHANGE ROLE                              */
+    /* ---------------------------------------------------------------------- */
+
+    builder.addCase(changeMemberRole.fulfilled, (state, action) => {
+      const member = state.members.find(
+        (item) => item._id === action.payload.memberId,
       );
 
-      if (index !== -1) {
-        state.members[index] = action.payload;
-      }
+      if (!member) return;
 
-      state.selectedMember = action.payload;
+      // If your API returns updated role object
+      if (action.payload.response?.data?.role) {
+        member.role = action.payload.response.data.role;
+      }
     });
 
-    /* ---------------- Change Status ---------------- */
+    /* ---------------------------------------------------------------------- */
+    /*                              CHANGE STATUS                             */
+    /* ---------------------------------------------------------------------- */
 
     builder.addCase(changeMemberStatus.fulfilled, (state, action) => {
       const member = state.members.find(
@@ -232,16 +315,36 @@ const memberSlice = createSlice({
       }
     });
 
-    /* ---------------- Delete ---------------- */
+    /* ---------------------------------------------------------------------- */
+    /*                               DELETE MEMBER                            */
+    /* ---------------------------------------------------------------------- */
 
     builder.addCase(removeMember.fulfilled, (state, action) => {
       state.members = state.members.filter(
         (member) => member._id !== action.payload,
       );
     });
+
+    /* ---------------------------------------------------------------------- */
+    /*                              RESEND INVITE                             */
+    /* ---------------------------------------------------------------------- */
+
+    builder.addCase(resendMemberInvite.pending, (state) => {
+      state.submitting = true;
+    });
+
+    builder.addCase(resendMemberInvite.fulfilled, (state) => {
+      state.submitting = false;
+    });
+
+    builder.addCase(resendMemberInvite.rejected, (state, action) => {
+      state.submitting = false;
+
+      state.error = action.error.message ?? "Failed to resend invitation";
+    });
   },
 });
 
-export const { clearMemberError, clearSelectedMember } = memberSlice.actions;
+export const { clearSelectedMember, clearMemberError } = memberSlice.actions;
 
 export default memberSlice.reducer;

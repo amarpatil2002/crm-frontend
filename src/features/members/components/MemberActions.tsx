@@ -1,15 +1,16 @@
+import { useState } from "react";
 import {
-  Edit,
-  MoreHorizontal,
-  RefreshCcw,
+  MoreVertical,
+  Pencil,
   Shield,
-  Trash2,
+  RefreshCcw,
   UserX,
+  Trash2,
 } from "lucide-react";
 
 import type { OrganizationMember } from "../types/member.type";
 
-interface MemberActionsProps {
+interface Props {
   member: OrganizationMember;
 
   onEdit?: (member: OrganizationMember) => void;
@@ -26,63 +27,94 @@ export default function MemberActions({
   onResendInvite,
   onSuspend,
   onDelete,
-}: MemberActionsProps) {
+}: Props) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <div className="flex items-center justify-end gap-2">
-      <ActionButton
-        title="Edit"
-        icon={<Edit size={16} />}
-        onClick={() => onEdit?.(member)}
-      />
+    <div className="relative flex justify-end">
+      <button
+        onClick={() => setOpen((prev) => !prev)}
+        className="rounded-lg p-2 text-gray-500 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900"
+      >
+        <MoreVertical size={18} />
+      </button>
 
-      <ActionButton
-        title="Change Role"
-        icon={<Shield size={16} />}
-        onClick={() => onChangeRole?.(member)}
-      />
+      {open && (
+        <div className="absolute right-0 top-11 z-50 w-60 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl">
+          <div className="border-b border-gray-100 px-4 py-3">
+            <p className="truncate text-sm font-semibold text-gray-900">
+              {member.user.fullName}
+            </p>
 
-      {member.status === "INVITED" && (
-        <ActionButton
-          title="Resend Invite"
-          icon={<RefreshCcw size={16} />}
-          onClick={() => onResendInvite?.(member)}
-        />
+            <p className="truncate text-xs text-gray-500">
+              {member.user.email}
+            </p>
+          </div>
+
+          <div className="py-2">
+            <button
+              onClick={() => {
+                onEdit?.(member);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50"
+            >
+              <Pencil size={16} className="text-gray-500" />
+              <span>Edit Member</span>
+            </button>
+
+            <button
+              onClick={() => {
+                onChangeRole?.(member);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50"
+            >
+              <Shield size={16} className="text-gray-500" />
+              <span>Change Role</span>
+            </button>
+
+            {member.status === "INVITED" && (
+              <button
+                onClick={() => {
+                  onResendInvite?.(member);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-gray-700 transition hover:bg-gray-50"
+              >
+                <RefreshCcw size={16} className="text-gray-500" />
+                <span>Resend Invitation</span>
+              </button>
+            )}
+
+            {member.status === "ACTIVE" && (
+              <button
+                onClick={() => {
+                  onSuspend?.(member);
+                  setOpen(false);
+                }}
+                className="flex w-full items-center gap-3 px-4 py-2.5 text-sm text-amber-700 transition hover:bg-amber-50"
+              >
+                <UserX size={16} />
+                <span>Suspend Member</span>
+              </button>
+            )}
+
+            <div className="my-2 border-t border-gray-100" />
+
+            <button
+              onClick={() => {
+                onDelete?.(member);
+                setOpen(false);
+              }}
+              className="flex w-full items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+            >
+              <Trash2 size={16} />
+              <span>Delete Member</span>
+            </button>
+          </div>
+        </div>
       )}
-
-      {member.status !== "SUSPENDED" && (
-        <ActionButton
-          title="Suspend Member"
-          icon={<UserX size={16} />}
-          onClick={() => onSuspend?.(member)}
-        />
-      )}
-
-      <ActionButton
-        title="Delete Member"
-        icon={<Trash2 size={16} />}
-        onClick={() => onDelete?.(member)}
-      />
-
-      <ActionButton title="More" icon={<MoreHorizontal size={18} />} />
     </div>
-  );
-}
-
-interface ActionButtonProps {
-  icon: React.ReactNode;
-  title: string;
-  onClick?: () => void;
-}
-
-function ActionButton({ icon, title, onClick }: ActionButtonProps) {
-  return (
-    <button
-      type="button"
-      title={title}
-      onClick={onClick}
-      className="rounded-lg p-2 text-gray-500 transition hover:bg-gray-100 hover:text-indigo-600"
-    >
-      {icon}
-    </button>
   );
 }

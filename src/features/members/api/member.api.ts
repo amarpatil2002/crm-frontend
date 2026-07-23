@@ -1,26 +1,11 @@
 import api from "../../../api/axios";
+
 import type {
   InviteMemberFormValues,
   OrganizationMember,
+  ApiResponse,
+  PaginatedResponse,
 } from "../types/member.type";
-
-interface ApiResponse<T> {
-  success: boolean;
-  message: string;
-  data: T;
-}
-
-interface MemberListResponse {
-  items: OrganizationMember[];
-  pagination: {
-    page: number;
-    limit: number;
-    total: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
-}
 
 export interface MemberQuery {
   page?: number;
@@ -36,7 +21,11 @@ export interface MemberQuery {
 export const inviteMember = async (
   payload: InviteMemberFormValues,
 ): Promise<ApiResponse<OrganizationMember>> => {
-  const response = await api.post("/crm/organization-member/invite", payload);
+  const response = await api.post<ApiResponse<OrganizationMember>>(
+    "/crm/organization-member/invite",
+    payload,
+  );
+
   return response.data;
 };
 
@@ -45,10 +34,13 @@ export const inviteMember = async (
  */
 export const getMembers = async (
   params?: MemberQuery,
-): Promise<ApiResponse<MemberListResponse>> => {
-  const response = await api.get("/crm/organization-member", {
-    params,
-  });
+): Promise<PaginatedResponse<OrganizationMember[]>> => {
+  const response = await api.get<PaginatedResponse<OrganizationMember[]>>(
+    "/crm/organization-member",
+    {
+      params,
+    },
+  );
 
   return response.data;
 };
@@ -59,7 +51,10 @@ export const getMembers = async (
 export const getMemberById = async (
   memberId: string,
 ): Promise<ApiResponse<OrganizationMember>> => {
-  const response = await api.get(`/crm/organization-member/${memberId}`);
+  const response = await api.get<ApiResponse<OrganizationMember>>(
+    `/crm/organization-member/${memberId}`,
+  );
+
   return response.data;
 };
 
@@ -70,18 +65,25 @@ export const updateMember = async (
   memberId: string,
   payload: Partial<InviteMemberFormValues>,
 ): Promise<ApiResponse<OrganizationMember>> => {
-  const response = await api.patch(`/crm/member/${memberId}`, payload);
+  const response = await api.patch<ApiResponse<OrganizationMember>>(
+    `/crm/organization-member/${memberId}`,
+    payload,
+  );
 
   return response.data;
 };
 
 /**
- * Change Member Role
+ * Update Member Role
  */
-export const updateMemberRole = async (memberId: string, role: string) => {
-  const response = await api.patch(`/crm/member/${memberId}/role`, {
-    role,
-  });
+export const updateMemberRole = async (
+  memberId: string,
+  role: string,
+): Promise<ApiResponse<OrganizationMember>> => {
+  const response = await api.patch<ApiResponse<OrganizationMember>>(
+    `/crm/organization-member/${memberId}/role`,
+    { role },
+  );
 
   return response.data;
 };
@@ -92,10 +94,11 @@ export const updateMemberRole = async (memberId: string, role: string) => {
 export const updateMemberStatus = async (
   memberId: string,
   status: "ACTIVE" | "INACTIVE" | "SUSPENDED",
-) => {
-  const response = await api.patch(`/crm/member/${memberId}/status`, {
-    status,
-  });
+): Promise<ApiResponse<OrganizationMember>> => {
+  const response = await api.patch<ApiResponse<OrganizationMember>>(
+    `/crm/organization-member/${memberId}/status`,
+    { status },
+  );
 
   return response.data;
 };
@@ -103,8 +106,12 @@ export const updateMemberStatus = async (
 /**
  * Delete Member
  */
-export const deleteMember = async (memberId: string) => {
-  const response = await api.delete(`/crm/member/${memberId}`);
+export const deleteMember = async (
+  memberId: string,
+): Promise<ApiResponse<null>> => {
+  const response = await api.delete<ApiResponse<null>>(
+    `/crm/organization-member/${memberId}`,
+  );
 
   return response.data;
 };
@@ -112,8 +119,12 @@ export const deleteMember = async (memberId: string) => {
 /**
  * Resend Invitation
  */
-export const resendInvitation = async (memberId: string) => {
-  const response = await api.post(`/crm/member/${memberId}/resend-invite`);
+export const resendInvitation = async (
+  memberId: string,
+): Promise<ApiResponse<null>> => {
+  const response = await api.post<ApiResponse<null>>(
+    `/crm/organization-member/${memberId}/resend-invite`,
+  );
 
   return response.data;
 };

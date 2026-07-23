@@ -50,7 +50,7 @@ const OrganizationProfilePage = () => {
   }
 
   return (
-    <section className="space-y-6 p-6">
+    <section className="space-y-2 ">
       {/* Small Header */}
 
       <div>

@@ -61,23 +61,6 @@ export default function MemberSearch({
               </option>
             ))}
           </select>
-
-          {/* Status */}
-          {/* <select
-            value={status}
-            onChange={(e) => onStatusChange(e.target.value)}
-            className="h-11 rounded-lg border border-gray-300 px-3 text-sm outline-none focus:border-indigo-500"
-          >
-            <option value="">All Status</option>
-
-            <option value="ACTIVE">Active</option>
-
-            <option value="INVITED">Invited</option>
-
-            <option value="INACTIVE">Inactive</option>
-
-            <option value="SUSPENDED">Suspended</option>
-          </select> */}
         </div>
 
         {/* Invite Button */}

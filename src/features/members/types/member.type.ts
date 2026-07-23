@@ -1,9 +1,3 @@
-export interface Role {
-  _id: string;
-  name: string;
-  code: string;
-}
-
 export interface InviteMemberFormValues {
   firstName: string;
   lastName: string;
@@ -15,21 +9,56 @@ export interface InviteMemberFormValues {
   employeeId?: string;
 }
 
-export interface OrganizationMember {
+export interface MemberUser {
   _id: string;
+  organizationId: string;
+  managerId: string | null;
+
   firstName: string;
   lastName: string;
-  fullName?: string;
+  fullName: string;
+
   email: string;
-  phone?: string;
+  phone: string | null;
+
+  avatar: string | null;
+
+  status: string;
+  isActive: boolean;
+}
+
+export interface Role {
+  _id: string;
+  name: string;
+  code: string;
+  description: string | null;
+
+  isDefault: boolean;
+  isSystem: boolean;
+
+  priority: number;
+
+  status: string;
+}
+
+export interface OrganizationMember {
+  _id: string;
+
+  organization?: string;
+
+  user: MemberUser;
+
   role: Role;
-  title?: string;
-  department?: string;
-  employeeId?: string;
+
+  title: string | null;
+  department: string | null;
+  employeeId: string | null;
+
   status: "INVITED" | "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
-  invitedAt: string;
-  acceptedAt?: string;
+  invitedAt: string | null;
+  acceptedAt: string | null;
+
   createdAt: string;
   updatedAt: string;
 }
@@ -38,4 +67,26 @@ export interface InviteMemberResponse {
   success: boolean;
   message: string;
   data: OrganizationMember;
+}
+
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+export interface PaginationMeta {
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+export interface PaginatedResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+  meta: PaginationMeta;
 }
