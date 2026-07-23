@@ -20,15 +20,10 @@ import type {
 
 interface MemberState {
   members: OrganizationMember[];
-
   selectedMember: OrganizationMember | null;
-
   pagination: PaginationMeta | null;
-
   loading: boolean;
-
   submitting: boolean;
-
   error: string | null;
 }
 

@@ -1,14 +1,26 @@
 import { useEffect, useMemo, useState } from "react";
-import { Users } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 
 import { useAppDispatch, useAppSelector } from "../../../app/hooks";
 
-import { fetchMembers, inviteOrganizationMember } from "../redux/memberSlice";
+import {
+  fetchMembers,
+  fetchMemberById,
+  inviteOrganizationMember,
+  updateOrganizationMember,
+  changeMemberRole,
+  changeMemberStatus,
+  removeMember,
+} from "../redux/memberSlice";
+
+import type {
+  InviteMemberFormValues,
+  OrganizationMember,
+} from "../types/member.type";
 
 import MemberSearch from "../components/MemberSearch";
 import MemberTable from "../components/MemberTable";
 import InviteMemberModal from "../components/InviteMemberModal";
-import type { OrganizationMember } from "../types/member.type";
 import MemberDetailsDrawer from "../components/MemberDetailsDrawer";
 
 export default function MembersPage() {
@@ -16,6 +28,7 @@ export default function MembersPage() {
 
   const {
     members = [],
+    selectedMember,
     loading,
     submitting,
   } = useAppSelector((state) => state.member);
@@ -23,15 +36,11 @@ export default function MembersPage() {
   const { roles = [] } = useAppSelector((state) => state.roles);
 
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [drawerOpen, setDrawerOpen] = useState(false);
 
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState("");
   const [role, setRole] = useState("");
-
-  const [selectedMember, setSelectedMember] =
-    useState<OrganizationMember | null>(null);
-
-  const [detailsOpen, setDetailsOpen] = useState(false);
 
   useEffect(() => {
     dispatch(fetchMembers());
@@ -51,13 +60,21 @@ export default function MembersPage() {
 
       const matchStatus = !status || member.status === status;
 
-      const matchRole = !role || member.role?._id === role;
+      const matchRole = !role || member.role._id === role;
 
       return matchSearch && matchStatus && matchRole;
     });
-  }, [members, search, status, role]);
+  }, [members, search, role, status]);
 
-  const handleInvite = async (data: any) => {
+  const handleMemberClick = async (member: OrganizationMember) => {
+    const result = await dispatch(fetchMemberById(member._id));
+
+    if (fetchMemberById.fulfilled.match(result)) {
+      setDrawerOpen(true);
+    }
+  };
+
+  const handleInvite = async (data: InviteMemberFormValues) => {
     const result = await dispatch(inviteOrganizationMember(data));
 
     if (inviteOrganizationMember.fulfilled.match(result)) {
@@ -67,37 +84,34 @@ export default function MembersPage() {
     }
   };
 
-  const handleSelectMember = (member: OrganizationMember) => {
-    setSelectedMember(member);
-    setDetailsOpen(true);
-  };
-
-  const handleCloseDrawer = () => {
-    setDetailsOpen(false);
-    setSelectedMember(null);
-  };
-
   return (
-    <div className="mx-auto max-w-7xl space-y-2 ">
+    <div className="space-y-6 p-6">
       {/* Header */}
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="rounded-xl bg-indigo-100 p-3">
-            <Users className="h-7 w-7 text-indigo-600" />
-          </div>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <Users className="h-8 w-8 text-indigo-600" />
 
           <div>
-            <h1 className="text-2xl font-bold">Team Members</h1>
+            <h1 className="text-2xl font-semibold">Team Members</h1>
 
             <p className="text-sm text-gray-500">
               Manage organization members.
             </p>
           </div>
         </div>
+
+        <button
+          onClick={() => setInviteOpen(true)}
+          className="flex items-center gap-2 bg-indigo-600 px-4 py-2 text-white"
+        >
+          <Plus size={18} />
+          Invite Member
+        </button>
       </div>
 
       {/* Search */}
+
       <MemberSearch
         search={search}
         status={status}
@@ -114,16 +128,33 @@ export default function MembersPage() {
       <MemberTable
         members={filteredMembers}
         loading={loading}
-        onSelectMember={handleSelectMember}
+        onSelectMember={async (member) => {
+          const result = await dispatch(fetchMemberById(member._id));
+
+          if (fetchMemberById.fulfilled.match(result)) {
+            setDrawerOpen(true);
+          }
+        }}
       />
+
       {/* Invite */}
 
+      <InviteMemberModal
+        open={inviteOpen}
+        loading={submitting}
+        roles={roles}
+        onClose={() => setInviteOpen(false)}
+        onSubmit={handleInvite}
+      />
+
+      {/* Member Drawer */}
+
       <MemberDetailsDrawer
-        open={detailsOpen}
+        open={drawerOpen}
         member={selectedMember}
         roles={roles}
         saving={submitting}
-        onClose={handleCloseDrawer}
+        onClose={() => setDrawerOpen(false)}
         onSave={(memberId, data) => {
           dispatch(
             updateOrganizationMember({
@@ -132,14 +163,27 @@ export default function MembersPage() {
             }),
           );
         }}
-      />
+        onUpdateRole={(memberId, roleId) => {
+          dispatch(
+            changeMemberRole({
+              memberId,
+              role: roleId,
+            }),
+          );
+        }}
+        onUpdateStatus={(memberId, status) => {
+          dispatch(
+            changeMemberStatus({
+              memberId,
+              status,
+            }),
+          );
+        }}
+        onDelete={(memberId) => {
+          dispatch(removeMember(memberId));
 
-      <InviteMemberModal
-        open={inviteOpen}
-        loading={submitting}
-        roles={roles}
-        onClose={() => setInviteOpen(false)}
-        onSubmit={handleInvite}
+          setDrawerOpen(false);
+        }}
       />
     </div>
   );

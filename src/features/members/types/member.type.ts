@@ -13,16 +13,12 @@ export interface MemberUser {
   _id: string;
   organizationId: string;
   managerId: string | null;
-
   firstName: string;
   lastName: string;
   fullName: string;
-
   email: string;
   phone: string | null;
-
   avatar: string | null;
-
   status: string;
   isActive: boolean;
 }
@@ -41,10 +37,22 @@ export interface Role {
   status: string;
 }
 
+export interface MemberReference {
+  _id: string;
+
+  firstName: string;
+  lastName: string;
+  fullName: string;
+
+  email: string;
+
+  id: string;
+}
+
 export interface OrganizationMember {
   _id: string;
 
-  organization?: string;
+  organization: string;
 
   user: MemberUser;
 
@@ -54,12 +62,34 @@ export interface OrganizationMember {
   department: string | null;
   employeeId: string | null;
 
+  joinedAt: string | null;
+
   status: "INVITED" | "ACTIVE" | "INACTIVE" | "SUSPENDED";
 
+  invitedBy: MemberReference | null;
+
   invitedAt: string | null;
+
   acceptedAt: string | null;
 
+  lastActiveAt: string | null;
+
+  inviteTokenExpiresAt: string | null;
+
+  inviteAcceptedAt: string | null;
+
+  metadata: Record<string, unknown>;
+
+  isDeleted: boolean;
+
+  deletedAt: string | null;
+
+  createdBy: MemberReference | null;
+
+  updatedBy: MemberReference | null;
+
   createdAt: string;
+
   updatedAt: string;
 }
 
