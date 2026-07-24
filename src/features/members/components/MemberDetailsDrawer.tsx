@@ -7,31 +7,26 @@ import type {
   OrganizationMember,
   Role,
 } from "../types/member.type";
+import { useAppSelector } from "../../../app/hooks";
 
 interface MemberDetailsDrawerProps {
   open: boolean;
   member: OrganizationMember | null;
   roles: Role[];
   saving?: boolean;
-
   onClose: () => void;
-
   onSave: (memberId: string, data: InviteMemberFormValues) => void;
-
   onUpdateRole?: (memberId: string, roleId: string) => void;
-
   onUpdateStatus?: (
     memberId: string,
     status: "ACTIVE" | "INACTIVE" | "SUSPENDED",
   ) => void;
-
   onDelete?: (memberId: string) => void;
 }
 
 export default function MemberDetailsDrawer({
   open,
   member,
-  roles,
   saving = false,
   onClose,
   onSave,
@@ -52,6 +47,8 @@ export default function MemberDetailsDrawer({
   >("ACTIVE");
 
   const [isEditOpen, setIsEditOpen] = useState(false);
+
+  const { roles } = useAppSelector((state) => state.roles);
 
   useEffect(() => {
     if (!member) return;
@@ -164,10 +161,11 @@ export default function MemberDetailsDrawer({
 
           <div className="flex-1 grid grid-cols-2 gap-6 overflow-y-auto p-4">
             {/* ================= PERSONAL INFORMATION ================= */}
+
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
               {/* Header */}
-              <div className="flex items-center justify-between border-b px-6 py-4">
-                <h3 className="text-lg font-semibold text-gray-900">
+              <div className="flex items-center justify-between px-6 py-4">
+                <h3 className="text-lg  font-semibold text-gray-900">
                   Personal Information
                 </h3>
 
@@ -336,20 +334,24 @@ export default function MemberDetailsDrawer({
                 </div>
               </div>
             )}
+
             {/* NEXT PART STARTS HERE */}
             {/* ================= ROLE & PERMISSIONS ================= */}
+
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
               {/* Header */}
-              <div className="flex items-center justify-between border-b px-6 py-4">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">
-                    Role & Permissions
-                  </h3>
-                </div>
+              <div className="border-b px-6 py-5">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Role & Permissions
+                </h3>
+
+                <p className="mt-1 text-sm text-gray-500">
+                  View the current role and assign a new one.
+                </p>
               </div>
 
-              {/* Body */}
-              <div className="space-y-5 p-6">
+              <div className="space-y-6 p-6">
+                {/* Current Role */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Current Role</span>
 
@@ -358,25 +360,62 @@ export default function MemberDetailsDrawer({
                   </span>
                 </div>
 
+                {/* Department */}
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-500">Department</span>
 
-                  <span className="text-sm font-medium text-gray-900">
+                  <span className="font-medium text-gray-900">
                     {member.department || "-"}
                   </span>
                 </div>
 
+                {/* Permissions */}
                 <div className="flex items-center justify-between">
-                  <span className="text-sm text-gray-500">Job Title</span>
+                  <span className="text-sm text-gray-500">Permissions</span>
 
-                  <span className="text-sm font-medium text-gray-900">
-                    {member.title || "-"}
+                  <span className="font-medium text-gray-900">
+                    {/* {member.role.permissions?.length ?? 0} */}0
                   </span>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-gray-500">Changer Role</span>
+
+                  <select
+                    value={selectedRole}
+                    onChange={(e) => setSelectedRole(e.target.value)}
+                    className=" rounded-lg border border-gray-300 bg-white px-3 py-2.5 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+                  >
+                    {roles.map((role) => (
+                      <option key={role._id} value={role._id}>
+                        {role.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <button
+                  type="button"
+                  className="text-sm font-medium text-indigo-600 hover:text-indigo-700"
+                >
+                  View all permissions →
+                </button>
+
+                <div className="mt-4 flex justify-end">
+                  <button
+                    type="button"
+                    hidden={selectedRole === member.role._id}
+                    onClick={handleRoleUpdate}
+                    className="rounded-lg bg-indigo-600 px-5 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 disabled:cursor-not-allowed disabled:bg-gray-300"
+                  >
+                    Update Role
+                  </button>
                 </div>
               </div>
             </div>
 
             {/* ================= ACCOUNT STATUS ================= */}
+
             <div className="rounded-xl border border-gray-200 bg-white shadow-sm">
               <div className="flex items-center justify-between border-b px-6 py-5">
                 <div>
@@ -452,7 +491,9 @@ export default function MemberDetailsDrawer({
                 </div>
               </div>
             </div>
+
             {/* ================= ACTIVITY ================= */}
+
             <div className="rounded-2xl border border-gray-200 bg-white shadow-sm">
               <div className="border-b px-6 py-5">
                 <h3 className="text-lg font-semibold text-gray-900">
